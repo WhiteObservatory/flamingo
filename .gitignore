@@ -18,3 +18,5 @@ dist/
 .DS_Store
 .idea/
 .vscode/
+# исполнитель local overrides (launch.json is shared and tracked)
+.dev/settings.local.json
