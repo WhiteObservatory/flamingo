@@ -65,7 +65,7 @@
 Запуск на маке:
 
 ```
-cd ~/исполнитель/Projects/Flamingo/frontend
+cd ~/Projects/Flamingo/frontend
 npm install
 npm run dev
 ```

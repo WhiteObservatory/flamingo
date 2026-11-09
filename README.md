@@ -23,10 +23,10 @@
 
 ```bash
 # окно 1 — бэкенд
-cd /Users/piu/исполнитель/Projects/Flamingo/backend && ./.venv/bin/python manage.py runserver 8080
+cd /Users/piu/Projects/Flamingo/backend && ./.venv/bin/python manage.py runserver 8080
 
 # окно 2 — фронт
-cd /Users/piu/исполнитель/Projects/Flamingo/frontend && npm run dev
+cd /Users/piu/Projects/Flamingo/frontend && npm run dev
 ```
 
 Открывать **http://localhost:5180**. Это техническая проба, не продукт.
@@ -40,7 +40,7 @@ curl http://localhost:8080/api/room/healthz     # {"ok": true, "livekit": true}
 Окружение бэкенда, если его нет:
 
 ```bash
-cd /Users/piu/исполнитель/Projects/Flamingo/backend
+cd /Users/piu/Projects/Flamingo/backend
 python3 -m venv .venv && ./.venv/bin/pip install -r requirements.txt
 ```
 
@@ -71,9 +71,9 @@ cd frontend && npm run check     # типы + приборы с самопров
 
 ```bash
 rm -rf ~/Downloads/УДАЛИТЬ-старый-flamingo-2026-08                       # 5 ГБ, старый монорепозиторий
-rm -rf "/Users/piu/исполнитель/Projects/Flamingo/УДАЛИТЬ-хлам-2026-08" # битые модули, linux-venv, старый прототип
-rm -rf "/Users/piu/исполнитель/Projects/Flamingo/.git/мусор-от-монтирования"
-rm -rf "/Users/piu/исполнитель/Projects/Flamingo/УДАЛИТЬ-старые-сборки"                  # прошлые dist, их нельзя было перезаписать
+rm -rf "/Users/piu/Projects/Flamingo/УДАЛИТЬ-хлам-2026-08" # битые модули, linux-venv, старый прототип
+rm -rf "/Users/piu/Projects/Flamingo/.git/мусор-от-монтирования"
+rm -rf "/Users/piu/Projects/Flamingo/УДАЛИТЬ-старые-сборки"                  # прошлые dist, их нельзя было перезаписать
 ```
 
 И остановить старые серверы на портах 5173, 5174 и 8000 — это ещё старый проект.
