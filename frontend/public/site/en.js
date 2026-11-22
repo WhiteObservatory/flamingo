@@ -200,7 +200,7 @@ window.FL_START({
 "Для учеников и преподавателей. Участие добровольное, по согласию.": "For students and teachers. Participation is voluntary, with consent.",
 "До 16 лет — с участием и согласием родителя.": "Under 16 — with a parent's participation and consent.",
 "Решения остаются за человеком.": "Decisions stay with people.",
-"Данные уроков и исследований — разные режимы.": "Lesson data and research data are different modes.",
+"Данные уроков и исследований — разные режимы: на уроке кадры с камеры не покидают устройство, а в исследовании, с согласия участника, видео, звук и точки лица записываются на сервер Flamingo и удаляются по просьбе.": "Lesson data and research data are different modes: in a lesson, camera frames never leave the device; in research, with the participant’s consent, video, sound and facial points are recorded to the Flamingo server and deleted on request.",
 "Прототип для обсуждения. Доступность функций уточняется по этапам.": "A prototype for discussion. The availability of features is being clarified step by step.",
 "Остановить движение": "Stop motion",
 "Закрыть": "Close",

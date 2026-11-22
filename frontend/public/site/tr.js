@@ -200,7 +200,7 @@ window.FL_START({
 "Для учеников и преподавателей. Участие добровольное, по согласию.": "Öğrenciler ve öğretmenler için. Katılım gönüllü, onayla.",
 "До 16 лет — с участием и согласием родителя.": "16 yaş altı — velinin katılımı ve onayıyla.",
 "Решения остаются за человеком.": "Kararlar insanlarda kalır.",
-"Данные уроков и исследований — разные режимы.": "Ders verileri ve araştırma verileri farklı modlardır.",
+"Данные уроков и исследований — разные режимы: на уроке кадры с камеры не покидают устройство, а в исследовании, с согласия участника, видео, звук и точки лица записываются на сервер Flamingo и удаляются по просьбе.": "Ders verileri ve araştırma verileri farklı modlardır: derste kamera görüntüleri cihazdan çıkmaz; araştırmada ise katılımcının onayıyla video, ses ve yüz noktaları Flamingo sunucusuna kaydedilir ve istek üzerine silinir.",
 "Прототип для обсуждения. Доступность функций уточняется по этапам.": "Tartışma için bir prototip. Özelliklerin kullanılabilirliği adım adım netleşiyor.",
 "Остановить движение": "Animasyonu durdur",
 "Закрыть": "Kapat",
