@@ -30,7 +30,7 @@
     { code: 'tr', name: 'Türkçe', ready: true },
     { code: 'ar', name: 'العربية', ready: false, rtl: true }
   ]
-  var DICT_VERSION = 2
+  var DICT_VERSION = 3
   function known(c) { for (var i = 0; i < LANGS.length; i += 1) if (LANGS[i].code === c) return LANGS[i]; return null }
   function ready(c) { var l = known(c); return !!(l && l.ready) }
   var lang = (function () {
