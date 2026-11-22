@@ -258,5 +258,6 @@ window.FL_START({
 "Прогресс учеников и исследование справедливых критериев оценки.": "Progreso de los alumnos e investigación sobre criterios de evaluación justos.",
 "Скоро": "Pronto",
 "История обучения, результаты тестов и индивидуальный контекст ученика.": "Historial de aprendizaje, resultados de las pruebas y contexto individual del alumno.",
-"Участие добровольное, по согласию. Для детей — с участием родителя.": "Participación voluntaria, con consentimiento. Para menores — con la participación de un familiar."
+"Участие добровольное, по согласию. Для детей — с участием родителя.": "Participación voluntaria, con consentimiento. Para menores — con la participación de un familiar.",
+"Проект WHITE OBSERVATORY": "Un proyecto de WHITE OBSERVATORY"
 })

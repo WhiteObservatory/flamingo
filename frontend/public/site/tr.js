@@ -258,5 +258,6 @@ window.FL_START({
 "Прогресс учеников и исследование справедливых критериев оценки.": "Öğrencilerin ilerlemesi ve adil değerlendirme ölçütleri üzerine araştırma.",
 "Скоро": "Yakında",
 "История обучения, результаты тестов и индивидуальный контекст ученика.": "Öğrenme geçmişi, test sonuçları ve öğrencinin bireysel bağlamı.",
-"Участие добровольное, по согласию. Для детей — с участием родителя.": "Katılım gönüllü, onayla. Çocuklar için — velinin katılımıyla."
+"Участие добровольное, по согласию. Для детей — с участием родителя.": "Katılım gönüllü, onayla. Çocuklar için — velinin katılımıyla.",
+"Проект WHITE OBSERVATORY": "Bir WHITE OBSERVATORY projesi"
 })
