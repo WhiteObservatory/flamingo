@@ -298,6 +298,21 @@ r = пост(запертая, "/api/auth/reset", {"key": ключ3, "password":
    settings.SECRET_KEY.startswith("небоевой") or len(settings.SECRET_KEY) >= 40,
    settings.SECRET_KEY[:12])
 
+def _настройки(**env):
+    import subprocess
+    окружение = {**os.environ, **env}
+    r = subprocess.run([sys.executable, "-c", "import config.settings"], env=окружение,
+                       capture_output=True, text=True)
+    return r.returncode, r.stderr
+
+код, ошибка = _настройки(DEBUG="0", SECRET_KEY="")
+да("боевой режим без своего ключа не запускается",
+   код != 0 and "SECRET_KEY" in ошибка, ошибка[-200:])
+код, ошибка = _настройки(DEBUG="0", SECRET_KEY="x" * 50)
+да("боевой режим со своим ключом запускается", код == 0, ошибка[-200:])
+код, ошибка = _настройки(DEBUG="1", SECRET_KEY="")
+да("разработка без ключа запускается — на запасном ключе", код == 0, ошибка[-200:])
+
 # ── Язык ответа ──────────────────────────────────────────────────────────
 раздел("Язык ответа:")
 # Язык ответа (config/язык.py): кука страницы, потом Accept-Language, иначе русский.

@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,6 +25,13 @@ def _list(name: str, default: str = "") -> list[str]:
 # Пустой ключ — не «поставим потом»: без него токен подписывается ничем.
 SECRET_KEY = os.getenv("SECRET_KEY", "") or "небоевой-ключ-только-для-разработки"
 DEBUG = os.getenv("DEBUG", "1") == "1"
+# Боевой режим без своего ключа не запускается: запасной ключ выше лежит в открытом
+# репозитории, и подписанной им кукой мог бы войти кто угодно под чьим угодно именем.
+# Проверено 22.11.2026: на сервере ключ задан (/opt/flamingo-v2/backend/.env).
+if not DEBUG and not os.getenv("SECRET_KEY", ""):
+    raise ImproperlyConfigured(
+        "SECRET_KEY не задан, а DEBUG выключен: боевой сервер не запускается с ключом из репозитория"
+    )
 ALLOWED_HOSTS = _list("ALLOWED_HOSTS", "localhost,127.0.0.1")
 
 INSTALLED_APPS = [
