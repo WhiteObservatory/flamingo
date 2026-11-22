@@ -85,16 +85,22 @@ try {
   есть(true, '«назад» от «Источников» возвращает')
   есть(ошибки.length === 0, `страница посредника без ошибок${ошибки.length ? ': ' + ошибки[0] : ''}`)
 
-  const чужое = await б.newPage()
+  /* С 18.11 страница говорит на языке браузера (кука fl_lang, иначе настройки
+     браузера). Проверки ниже ищут русские слова — значит, и браузер русский. */
+  const чужое = await б.newPage({ locale: 'ru-RU' })
   await чужое.goto('http://localhost:8042/#https://evil.example/')
   await чужое.waitForTimeout(700)
   есть((await чужое.locator('#слова').innerText()).includes('в каталоге нет'), 'адрес вместо имени источника не открывается')
 
   console.log('\nКто может пользоваться тоннелем')
-  const гость = await б.newPage()
+  const гость = await б.newPage({ locale: 'ru-RU' })
   await гость.goto('http://localhost:8043/#проба')
   await гость.waitForTimeout(900)
   есть((await гость.locator('#слова').innerText()).includes('Войдите во Flamingo'), 'гостю — «войдите», источник не открывается')
+  const гостьEn = await б.newPage({ locale: 'en-US' })
+  await гостьEn.goto('http://localhost:8043/#проба')
+  await гостьEn.waitForTimeout(900)
+  есть((await гостьEn.locator('#слова').innerText()).includes('Sign in to Flamingo'), 'гостю с английским браузером — то же по-английски')
   const код = (шапки) => new Promise((готово) => {
     const з = http.request({ host: '127.0.0.1', port: 8043, path: '/wisp/', headers: { Connection: 'Upgrade', Upgrade: 'websocket', 'Sec-WebSocket-Key': 'x3JJHMbDL1EzLkh9GBhXDw==', 'Sec-WebSocket-Version': '13', ...шапки } })
     з.on('response', (о) => готово(о.statusCode)); з.on('upgrade', () => готово(101)); з.on('error', () => готово(0)); з.end()
