@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Что означает дробь — Flamingo</title>
+<script>if(location.protocol==='file:')location.replace('https://flamingo.plus/sedum/anna/')</script>
 <style>
 @font-face{font-family:Inter;src:url('../assets/inter-cyrillic.woff2') format('woff2');font-weight:100 900;font-display:swap}
 :root{color-scheme:light;--ink:#1d1d1f;--muted:#6e6e73;--line:#dce2ea;--blue:#2867a8;--pale:#edf4fb}
@@ -140,8 +141,8 @@ function closeCamera(){
  cameraButton.setAttribute('aria-pressed','false');cameraButton.textContent='Включить камеру';cameraButton.disabled=false;
  cameraNote.hidden=true;
 }
-cameraButton?.addEventListener('click',async()=>{
- if(videoStream){closeCamera();return;}
+async function openCamera(){
+ if(videoStream)return;
  const revision=++cameraRevision;
  cameraButton.disabled=true;
  try{
@@ -153,9 +154,10 @@ cameraButton?.addEventListener('click',async()=>{
   for(const track of stream.getVideoTracks())track.addEventListener('ended',()=>{if(videoStream===stream)closeCamera();},{once:true});
   await camera.play();
  }catch{
-  if(revision===cameraRevision){closeCamera();cameraNote.textContent='Камера недоступна. Урок можно продолжить без неё.';cameraNote.hidden=false;}
+  if(revision===cameraRevision){closeCamera();cameraNote.textContent='Камера не включилась. Проверь разрешение на камеру для flamingo.plus и нажми «Включить камеру».';cameraNote.hidden=false;}
  }finally{if(revision===cameraRevision)cameraButton.disabled=false;}
-});
+}
+cameraButton.addEventListener('click',()=>videoStream?closeCamera():openCamera());
 window.addEventListener?.('pagehide',closeCamera);
 let tutor=firstLesson(), lessonNumber=1;
 const mic=document.querySelector('#mic'),sound=document.querySelector('#sound'),status=document.querySelector('#audio-status');
@@ -192,8 +194,31 @@ async function openComputerMic(){
   return current;
  }catch(err){current.getTracks().forEach(t=>t.stop());if(activeDevice)activeDevice.textContent='';throw err;}
 }
+let roomMic=null,roomMicPending=null,micVersion=0;
+function closeRoomMic(){
+ micVersion++;roomMicPending=null;roomMic?.getTracks().forEach(t=>t.stop());roomMic=null;
+}
+function acquireRoomMic(){
+ if(roomMic?.getAudioTracks()[0]?.readyState==='live')return Promise.resolve(roomMic);
+ if(roomMicPending)return roomMicPending;
+ const version=micVersion;
+ roomMicPending=openComputerMic().then(stream=>{
+  if(version!==micVersion||!autoTalk){stream.getTracks().forEach(t=>t.stop());throw Error('cancelled');}
+  roomMic=stream;updateMic();return stream;
+ }).finally(()=>{if(version===micVersion)roomMicPending=null;});
+ return roomMicPending;
+}
+function prepareRoomMic(){
+ const version=micVersion;
+ void acquireRoomMic().catch(e=>{
+  if(version!==micVersion)return;
+  disableAuto();updateMic();status.textContent=e.message==='phone-mic'?'Выбран телефон. Укажи микрофон компьютера в настройках звука.':'Микрофон не включился. Проверь разрешение для flamingo.plus и нажми «Микрофон».';
+ });
+}
 inputDevice?.addEventListener('change',()=>{
+ closeRoomMic();
  if(recognition?.auto){const r=recognition;recognition=null;r.abort();updateMic();queueAuto();}
+ if(autoTalk)prepareRoomMic();
 });
 const Recognition=window.SpeechRecognition||window.webkitSpeechRecognition;
 const synth=window.speechSynthesis;
@@ -325,6 +350,7 @@ function queueAuto(){
 }
 function disableAuto(){
  autoTalk=false;clearTimeout(autoTimer);
+ closeRoomMic();
  if(handsfree){handsfree.setAttribute('aria-label','Включить голосовой разговор');handsfree.setAttribute('aria-pressed','false');}
 }
 const task=document.querySelector('#task'), tape=document.querySelector('#tape'), restart=document.querySelector('#restart');
@@ -412,7 +438,7 @@ function board(){
 }
 function updateMic(){mic.disabled=autoTalk||coachBusy||!answerStage()||!!recognition&&!recognition.recording||speaking||player?.paused===false||tutor.snapshot().done;
  if(handsfree)handsfree.disabled=!autoTalk&&(!answerStage()||welcomeOptions.group||tutor.snapshot().done);
- if(voiceState)voiceState.textContent=speaking?'Анна говорит':recognition?.recording?'Твой ход · микрофон включён':recognition?'Распознаю ответ':autoTalk&&answerStage()?'Голосовой разговор включён':'Микрофон выключен';
+ if(voiceState)voiceState.textContent=recognition?.recording?'Твой ход · микрофон включён':recognition?'Распознаю ответ':autoTalk&&roomMic?.active?(speaking?'Микрофон включён · Анна говорит':'Микрофон включён'):autoTalk?'Подключаем микрофон…':'Микрофон выключен';
  mic.textContent=recognition?.recording?'Готово, отправить голос':'Ответить голосом';}
 function say(text,preview=false){
  const diagram=boardSpeech?.text===text?boardSpeech:null;boardSpeech=null;
@@ -550,7 +576,7 @@ async function enterAnna(){
  stage='welcome';document.querySelector('#reply-label').textContent='Как настроение?';
  lockAnswer(false);sound.checked=true;autoTalk=true;
  handsfree.setAttribute('aria-pressed','true');handsfree.setAttribute('aria-label','Выключить голосовой разговор');
- cameraButton.click();display(greeting);
+ void openCamera();prepareRoomMic();display(greeting);
 }
 document.querySelector('#start-lesson').addEventListener('click',enterAnna);
 async function submitReply(text,source='text'){
@@ -655,6 +681,7 @@ handsfree?.addEventListener('click',()=>{
  if(!answerStage()||tutor.snapshot().done||welcomeOptions.group||recognition)return;
  if(!navigator.mediaDevices?.getUserMedia||typeof AudioContext==='undefined'){status.textContent='Непрерывный режим недоступен. Можно ответить текстом.';return;}
  autoTalk=true;sound.checked=true;handsfree.setAttribute('aria-pressed','true');handsfree.setAttribute('aria-label','Выключить голосовой разговор');
+ prepareRoomMic();
  updateMic();if(lastSpeech&&!speaking)say(lastSpeech);else queueAuto();
 });
 end.addEventListener('click',()=>{
@@ -689,11 +716,11 @@ async function showVoiceTurn(result,measuredEnd=null){
 async function listenLocally(){
  let stream,context,timer;
  const chunks=[], request=new AbortController();
- function release(){clearTimeout(timer);stream?.getTracks().forEach(t=>t.stop());if(context&&context.state!=='closed')void context.close().catch(()=>{});}
+ function release(){clearTimeout(timer);if(!ticket.auto)stream?.getTracks().forEach(t=>t.stop());if(context&&context.state!=='closed')void context.close().catch(()=>{});}
  const ticket={recording:false,auto:autoTalk,abort(){request.abort();release();}};
  recognition=ticket;updateMic();status.textContent='Запрашиваю микрофон…';
  try{
-  stream=await openComputerMic();
+  stream=ticket.auto?await acquireRoomMic():await openComputerMic();
   if(recognition!==ticket){release();return;}
   context=new AudioContext();
   await context.audioWorklet.addModule('./mic-capture.mjs');
