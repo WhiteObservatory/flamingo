@@ -84,7 +84,6 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
 <button id="camera-toggle" type="button" aria-pressed="false">Включить камеру</button>
 <button id="text-toggle" class="primary" type="button" aria-expanded="false" aria-controls="text-form">Ответить текстом</button>
 <details id="audio-settings"><summary>Настройки звука</summary>
- <label><input type="checkbox" id="test-trace"> Тестовый журнал реплик с этого момента</label>
 <p><label for="input-device">Микрофон</label> <select id="input-device"><option value="">Автовыбор · предпочитать микрофон компьютера</option></select></p>
 <p id="active-device" class="muted"></p>
 <p id="voice-latency" class="muted" hidden></p>
@@ -221,8 +220,8 @@ function resetMouth(){
  mouth?.style.setProperty('--mouth-opacity','0');
  if(mouth)mouth.dataset.shape='silence';
 }
-function syncMouth(wav,revision,text,timeline){
- if(!mouth||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+function syncMouth(wav,revision,text,timeline,probe){
+ if(!mouth||window.matchMedia('(prefers-reduced-motion: reduce)').matches){if(probe)trace('audio','Анимация отключена');return;}
  const view=new DataView(wav);
  if(view.byteLength<44||view.getUint32(0)!==0x52494646||view.getUint16(34,true)!==16)return;
  const sr=view.getUint32(24,true);
@@ -266,6 +265,7 @@ function syncMouth(wav,revision,text,timeline){
   lipOpening.setAttribute('d',`M482 326 Q522 331 574 306 Q${522+(1-width)*8} ${331+gap*2} 482 326Z`);
   lipOffset.setAttribute('transform',`translate(0 ${gap})`);
   mouth.setAttribute('opacity',jaw>.035?'1':'0');
+  if(probe)probe(ms,jaw>.035);
   mouthFrame=requestAnimationFrame(tick);
  };
  tick();
@@ -426,7 +426,7 @@ function say(text,preview=false){
   const controller=new AbortController();pendingAudio=controller;
   const finish=()=>{if(revision===speechRevision){cancelLessonAudio();speaking=false;updateMic();queueAuto();}};
   const requestVoice=async line=>{const res=await fetch('https://api.flamingo.plus/api/anna/voice',{credentials:'include',method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:line,voice:demo.value,still:true}),signal:controller.signal});if(!res.ok)throw new Error('audio');return res.arrayBuffer();};
-  const handleError=()=>{if(revision===speechRevision){status.textContent='Не удалось озвучить реплику. Текст доступен в диалоге.';finish();}};
+  const handleError=()=>{if(revision===speechRevision){trace('audio','Сбой озвучки');status.textContent='Не удалось озвучить реплику. Текст доступен в диалоге.';finish();}};
   const cues=diagram?diagram.parts.map(spokenMath):[lineText];
   const playReply=async ()=>{
     const clips=[];
@@ -439,10 +439,27 @@ function say(text,preview=false){
     lessonAudio.onended=()=>{trace('audio','Реплика проиграна до конца',{ms:Math.round(lessonAudio.currentTime*1000)});finish();};
     lessonAudio.onerror=()=>{trace('audio','Ошибка плеера',{ms:Math.round(lessonAudio.currentTime*1000)});handleError();};
     lessonAudio.onwaiting=()=>{if(lessonAudio.currentTime>0)trace('audio','Плеер ожидает данные',{ms:Math.round(lessonAudio.currentTime*1000)});};
-    if(diagram)lessonAudio.ontimeupdate=()=>{diagram.guide.dataset.focus=lessonAudio.currentTime>=starts[1]?'bottom':'top';};
+    let focus='',lastFrame=null,maxGap=0,upperMoved=false,lowerMoved=false;
+    const boundary=Math.round((starts[1]||0)*1000);
+    if(diagram)trace('audio','План перехода к знаменателю',{ms:boundary});
+    const focusAt=ms=>{
+     const next=ms>=boundary?'bottom':'top';
+     if(next!==focus){focus=next;diagram.guide.dataset.focus=next;if(next==='bottom')trace('audio','Переход к знаменателю',{ms:Math.round(ms)});}
+    };
+    if(diagram)lessonAudio.ontimeupdate=()=>focusAt(lessonAudio.currentTime*1000);
+    const probe=diagram?(ms,open)=>{
+     focusAt(ms);
+     if(lastFrame!==null&&ms>=boundary-250&&lastFrame<=boundary+250)
+      maxGap=Math.max(maxGap,ms-lastFrame);
+     lastFrame=ms;
+     if(ms<boundary&&open&&!upperMoved){upperMoved=true;trace('audio','Губы: числитель',{ms:Math.round(ms)});}
+     if(ms>=boundary&&open&&!lowerMoved){lowerMoved=true;trace('audio','Губы: знаменатель',{ms:Math.round(ms)});}
+     if(ms>boundary+250&&maxGap>0){trace('audio','Интервал кадров на стыке',{ms:Math.round(maxGap)});maxGap=0;}
+    }:null;
     lessonAudio.onplaying=()=>{
      if(revision!==speechRevision)return;
-     resetMouth();syncMouth(wav,revision,cues.join(' '),null);
+     trace('audio','Начато воспроизведение',{ms:Math.round(lessonAudio.currentTime*1000)});
+     resetMouth();syncMouth(wav,revision,cues.join(' '),null,probe);
      if(diagram)lessonAudio.ontimeupdate();
      if(measuredEnd===null)return;
      latencyLine.textContent='Последний голосовой ход: '+((performance.now()-measuredEnd)/1000).toFixed(2).replace('.',',')+' с от конца речи до начала ответа Анны.';
@@ -470,7 +487,7 @@ function say(text,preview=false){
  synth.speak(line);
 }
 sample?.addEventListener('click',()=>{if(!recognition&&!tutor.snapshot().done)say('Две пятых. Полоску разделили на пять равных частей. Две из них закрасили. Я не расслышала ответ. Повтори, пожалуйста.',true);});
-function add(text){trace('dialogue',text);const line=document.createElement('li');line.textContent=text;if(text.startsWith('Ученик'))line.setAttribute?.('data-student','');output.append(line);output.scrollTop=output.scrollHeight;}
+function add(text){const line=document.createElement('li');line.textContent=text;if(text.startsWith('Ученик'))line.setAttribute?.('data-student','');output.append(line);output.scrollTop=output.scrollHeight;}
 function lockAnswer(locked){reply.disabled=locked;form.querySelector('button').disabled=locked;}
 function paintLessonLine(){
  if(!currentQuestion)return;
@@ -525,6 +542,7 @@ async function enterAnna(){
  }
  if(stage!=='setup'||tutor.snapshot().done)return;
  document.querySelector('.control-dock').inert=false;
+ traceRun=crypto.randomUUID();trace('start','Начат тестовый урок');
  const greeting=lessonWelcome(welcomeOptions);
  entry.hidden=true;
  const pupilName=document.querySelector('#pupil-name');
@@ -535,10 +553,6 @@ async function enterAnna(){
  cameraButton.click();display(greeting);
 }
 document.querySelector('#start-lesson').addEventListener('click',enterAnna);
-document.querySelector('#test-trace').addEventListener('change',e=>{
- if(e.target.checked){traceRun=crypto.randomUUID();trace('start','Включён журнал урока');}
- else traceRun=null;
-});
 async function submitReply(text,source='text'){
  if(stage==='lesson'){
   const boardReply=explainOnBoard(text);
@@ -708,7 +722,7 @@ async function listenLocally(){
     const res=await fetch('https://api.flamingo.plus/api/anna/listen',{credentials:'include',method:'POST',headers:{'Content-Type':'audio/wav'},body:wav,signal:request.signal});
     if(!res.ok)throw new Error('recognition');
     const result=await res.json();if(recognition!==ticket)return;
-    trace('recognition',result.transcript||'(пусто)',{confidence:result.confidence});
+    trace('recognition',result.transcript?'Ответ распознан':'Нет распознанной речи');
     recognition=null;status.textContent='';
     await showVoiceTurn({...result,local:true},ticket.auto&&heard?lastLoudAt:null);updateMic();queueAuto();
    }catch{if(recognition===ticket){recognition=null;disableAuto();status.textContent='Не удалось распознать голос локально. Попробуй ещё раз или напиши ответ.';updateMic();}}
