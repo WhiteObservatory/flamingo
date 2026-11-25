@@ -1,6 +1,8 @@
 from django.urls import include, path
+from common.anna import pilot as anna_pilot
 
 urlpatterns = [
+    path("api/anna/<slug:action>", anna_pilot),
     path("api/room/", include("room.urls")),
     path("api/auth/", include("people.urls")),
     # Админка владельца: люди, проверка преподавателей, блокировка, журнал.
