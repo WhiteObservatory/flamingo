@@ -68,7 +68,12 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
  <article id="method"><h3>Дроби: от рисунка к записи</h3><ol><li>Покажи целое на рисунке.</li><li>Проверь, одинаковы ли части по размеру.</li><li>Посчитай все равные части, затем — закрашенные.</li><li>Объясни, что означает каждое число в записи.</li></ol><p><strong>Для практики:</strong> нарисуй полоску из восьми равных частей. Закрась четыре и найди другую запись той же доли.</p></article>
  <article id="sources" hidden><h3>Источники</h3><p><a href="https://openstax.org/books/prealgebra-2e/pages/4-1-visualize-fractions" target="_blank" rel="noopener noreferrer">OpenStax: дроби на рисунках</a> <span class="muted">· на английском, откроется в новой вкладке</span></p><p>Учебные примеры с равными частями и разными записями одной доли.</p></article>
 </section>
-<aside class="teacher" aria-label="Участники"><h2>Участники</h2><div class="teacher-tile"><div class="avatar"><img class="portrait" src="./teacher.jpg" alt="" width="800" height="600"></div><div class="bio"><strong>Анна · AI-учитель</strong>
+<aside class="teacher" aria-label="Участники"><h2>Участники</h2><div class="teacher-tile"><div class="avatar"><svg class="portrait" viewBox="0 0 1000 750" aria-hidden="true">
+ <defs><clipPath id="lower-lip"><path d="M482 326 Q522 331 574 306 Q566 340 522 345 Q497 345 482 326Z"/></clipPath></defs>
+ <image href="./teacher.jpg" width="1000" height="750"/>
+ <g id="talking-lips" opacity="0"><path fill="#71382f" id="lip-opening"/>
+ <g id="lip-offset"><image href="./teacher.jpg" width="1000" height="750" clip-path="url(#lower-lip)"/></g></g>
+ </svg></div><div class="bio"><strong>Анна · AI-учитель</strong>
 <details id="transcript"><summary>Текст урока</summary><ol id="output" aria-live="off"></ol></details>
 </div></div>
 <div class="pupil"><video id="pupil-video" class="pupil-video" autoplay muted playsinline hidden></video><span id="pupil-name" class="pupil-id">Ты</span><p id="pupil-off" class="pupil-off">Камера выключена</p><p id="camera-note" role="status" class="teacher-note" hidden></p></div></aside>
@@ -98,6 +103,7 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
 </footer>
 </div>
 <script type="module">
+import {joinSpeech} from './speech-track.mjs';
 import {firstLesson,secondLesson,thirdLesson,voiceTurn,lessonWelcome,lessonTopic,isWelcomeStop,spokenMath,difficultyVoice,confirmDifficulty} from './tutor-lesson.mjs';
 const output=document.querySelector('#output'),form=document.querySelector('form'),end=document.querySelector('#end'),reply=document.querySelector('#reply');
 const currentQuestion=document.querySelector('#current-question'),voiceState=document.querySelector('#voice-state');
@@ -205,11 +211,12 @@ function trace(kind,text='',extra={}){
 }
 let voiceEndAt=null;
 let pendingAudio=null, audioUrl=null;
-const mouth=document.querySelector('.mouth');
+const mouth=document.querySelector('#talking-lips'), lipOpening=document.querySelector('#lip-opening'),lipOffset=document.querySelector('#lip-offset');
 let mouthFrame=0;
 function resetMouth(){
  if(mouthFrame)cancelAnimationFrame(mouthFrame);
  mouthFrame=0;
+ mouth.setAttribute('opacity','0');
  mouth?.style.setProperty('--jaw','0');
  mouth?.style.setProperty('--mouth-opacity','0');
  if(mouth)mouth.dataset.shape='silence';
@@ -255,12 +262,17 @@ function syncMouth(wav,revision,text,timeline){
   mouth.style.setProperty('--mouth-opacity',Math.min(.83,jaw*1.8).toFixed(3));
   mouth.dataset.shape=energy<.04?'silence':shape;
   mouth.dataset.sound=token;
+  const gap=jaw*10;
+  lipOpening.setAttribute('d',`M482 326 Q522 331 574 306 Q${522+(1-width)*8} ${331+gap*2} 482 326Z`);
+  lipOffset.setAttribute('transform',`translate(0 ${gap})`);
+  mouth.setAttribute('opacity',jaw>.035?'1':'0');
   mouthFrame=requestAnimationFrame(tick);
  };
  tick();
 }
 function cancelLessonAudio(){
  resetMouth();
+ if(lessonAudio){lessonAudio.onended=null;lessonAudio.onplaying=null;lessonAudio.onerror=null;lessonAudio.ontimeupdate=null;lessonAudio.onwaiting=null;}
  pendingAudio?.abort();pendingAudio=null;
  lessonAudio?.pause();
  if(audioUrl){URL.revokeObjectURL(audioUrl);audioUrl=null;}
@@ -416,16 +428,23 @@ function say(text,preview=false){
   const requestVoice=async line=>{const res=await fetch('https://api.flamingo.plus/api/anna/voice',{credentials:'include',method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:line,voice:demo.value,still:true}),signal:controller.signal});if(!res.ok)throw new Error('audio');return res.arrayBuffer();};
   const handleError=()=>{if(revision===speechRevision){status.textContent='Не удалось озвучить реплику. Текст доступен в диалоге.';finish();}};
   const cues=diagram?diagram.parts.map(spokenMath):[lineText];
-  const showPart=async i=>{
-    const wav=await requestVoice(cues[i]);
+  const playReply=async ()=>{
+    const clips=[];
+    for(const cue of cues)clips.push(await requestVoice(cue));
+    const {wav,starts}=joinSpeech(clips);
     if(revision!==speechRevision)return;
     if(audioUrl)URL.revokeObjectURL(audioUrl);
     const blob=new Blob([wav],{type:'audio/wav'});
-    audioUrl=URL.createObjectURL(blob);lessonAudio.src=audioUrl;lessonAudio.onended=()=>{if(i+1<cues.length&&revision===speechRevision){void showPart(i+1).catch(handleError);}else finish();};lessonAudio.onerror=finish;
+    audioUrl=URL.createObjectURL(blob);lessonAudio.src=audioUrl;
+    lessonAudio.onended=()=>{trace('audio','Реплика проиграна до конца',{ms:Math.round(lessonAudio.currentTime*1000)});finish();};
+    lessonAudio.onerror=()=>{trace('audio','Ошибка плеера',{ms:Math.round(lessonAudio.currentTime*1000)});handleError();};
+    lessonAudio.onwaiting=()=>{if(lessonAudio.currentTime>0)trace('audio','Плеер ожидает данные',{ms:Math.round(lessonAudio.currentTime*1000)});};
+    if(diagram)lessonAudio.ontimeupdate=()=>{diagram.guide.dataset.focus=lessonAudio.currentTime>=starts[1]?'bottom':'top';};
     lessonAudio.onplaying=()=>{
      if(revision!==speechRevision)return;
-     if(diagram)diagram.guide.dataset.focus=i===0?'top':'bottom';
-     if(i!==0||measuredEnd===null)return;
+     resetMouth();syncMouth(wav,revision,cues.join(' '),null);
+     if(diagram)lessonAudio.ontimeupdate();
+     if(measuredEnd===null)return;
      latencyLine.textContent='Последний голосовой ход: '+((performance.now()-measuredEnd)/1000).toFixed(2).replace('.',',')+' с от конца речи до начала ответа Анны.';
      latencyLine.hidden=false;
      trace('audio','Начало ответа Анны',{ms:Math.round(performance.now()-measuredEnd)});
@@ -438,7 +457,7 @@ function say(text,preview=false){
      resume.onclick=()=>{resume.hidden=true;if(revision===speechRevision)lessonAudio.play().catch(handleError);};
     }
   };
-  void showPart(0).catch(handleError);
+  void playReply().catch(handleError);
   return;
  }
  const voice=russianVoice();
