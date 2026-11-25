@@ -149,6 +149,7 @@ async function openCamera(){
   const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'},audio:false});
   if(revision!==cameraRevision){stream.getTracks().forEach(track=>track.stop());return;}
   videoStream=stream;camera.srcObject=stream;camera.hidden=false;cameraOff.hidden=true;
+  if(stream.getVideoTracks().some(t=>t.enabled&&t.readyState==='live'))traceDevice('Камера');
   cameraButton.setAttribute('aria-pressed','true');cameraButton.textContent='Выключить камеру';
   cameraNote.textContent='Камера видна только тебе';cameraNote.hidden=false;
   for(const track of stream.getVideoTracks())track.addEventListener('ended',()=>{if(videoStream===stream)closeCamera();},{once:true});
@@ -204,7 +205,7 @@ function acquireRoomMic(){
  const version=micVersion;
  roomMicPending=openComputerMic().then(stream=>{
   if(version!==micVersion||!autoTalk){stream.getTracks().forEach(t=>t.stop());throw Error('cancelled');}
-  roomMic=stream;updateMic();return stream;
+  roomMic=stream;if(stream.getAudioTracks().some(t=>t.enabled&&t.readyState==='live'))traceDevice('Микрофон');updateMic();return stream;
  }).finally(()=>{if(version===micVersion)roomMicPending=null;});
  return roomMicPending;
 }
@@ -226,6 +227,8 @@ const demo=document.querySelector('#voice-demo'),player=document.querySelector('
 const lessonAudio=demo?new Audio():null;
 const latencyLine=document.querySelector('#voice-latency');
 let traceRun=null,traceSeq=0,traceQueue=Promise.resolve();
+let lessonStartedAt=0;
+function traceDevice(name){trace('mic',name+': дорожка активна',{ms:Math.round(performance.now()-lessonStartedAt)});}
 function trace(kind,text='',extra={}){
  if(!traceRun)return;
  const body=JSON.stringify({run:traceRun,seq:++traceSeq,kind,text,...extra});
@@ -568,7 +571,7 @@ async function enterAnna(){
  }
  if(stage!=='setup'||tutor.snapshot().done)return;
  document.querySelector('.control-dock').inert=false;
- traceRun=crypto.randomUUID();trace('start','Начат тестовый урок');
+ lessonStartedAt=performance.now();traceRun=crypto.randomUUID();trace('start','Начат тестовый урок');
  const greeting=lessonWelcome(welcomeOptions);
  entry.hidden=true;
  const pupilName=document.querySelector('#pupil-name');
@@ -727,15 +730,23 @@ async function listenLocally(){
   if(recognition!==ticket){release();return;}
   const capture=new AudioWorkletNode(context,'anna-capture');
   const muted=context.createGain();muted.gain.value=0;
-  let loud=0, quiet=0, heard=false, lastLoudAt=null;
+  let loud=0, quiet=0, heard=false, lastLoudAt=null, buffered=0;
   capture.port.onmessage=e=>{
    if(!ticket.recording)return;
    chunks.push(e.data);
    if(!ticket.auto)return;
    const level=e.data.reduce((sum,x)=>sum+x*x,0)/e.data.length;
-   if(level>.00004){lastLoudAt=performance.now();loud+=e.data.length;quiet=0;if(!heard&&loud>=context.sampleRate*.13){heard=true;trace('mic','Обнаружен звук');}}
-   else quiet+=e.data.length;
-   if(heard&&quiet>=context.sampleRate*1.55)void ticket.finish();
+   const rate=context.sampleRate;
+   buffered+=e.data.length;
+   if(!heard)while(chunks.length>1&&buffered-chunks[0].length>=rate*.35)buffered-=chunks.shift().length;
+   if(level>.00004){lastLoudAt=performance.now();loud+=e.data.length;quiet=0;if(!heard&&loud>=rate*.13){heard=true;trace('mic','Обнаружен звук');}}
+   else {quiet+=e.data.length;if(!heard)loud=0;}
+   if(heard&&quiet>=rate*1.55){void ticket.finish();return;}
+   if(heard&&buffered-quiet>=rate*9.85){
+    trace('mic','Лимит записи: фраза не отправлена');
+    recognition=null;ticket.abort();disableAuto();updateMic();
+    status.textContent='Ответ слишком длинный для одного хода. Включи микрофон и попробуй сказать короче или напиши ответ.';
+   }
   };
   context.createMediaStreamSource(stream).connect(capture).connect(muted).connect(context.destination);
   await context.resume();
@@ -756,14 +767,7 @@ async function listenLocally(){
   };
   ticket.recording=true;updateMic();status.textContent=ticket.auto?'Слушаю. После ответа сделай небольшую паузу.':'Слушаю. Закончив ответ, нажми «Готово».';
   trace('mic','Микрофон слушает');
-  timer=setTimeout(()=>{
-   if(recognition!==ticket||!ticket.recording)return;
-   if(ticket.auto&&heard){
-    trace('mic','Лимит записи: фраза не отправлена');
-    recognition=null;ticket.abort();disableAuto();updateMic();
-    status.textContent='Ответ слишком длинный для одного хода. Включи микрофон и попробуй сказать короче или напиши ответ.';
-   }else void ticket.finish();
-  },9500);
+  if(!ticket.auto)timer=setTimeout(()=>void ticket.finish(),9500);
  }catch(err){
   release();
   if(recognition===ticket){recognition=null;disableAuto();status.textContent=err.message==='phone-mic'?'Браузер выбрал телефон. Назначь микрофон Mac в настройках звука или в настройках браузера.':'Микрофон недоступен. Проверь разрешение браузера или напиши ответ.';if(err.message==='phone-mic'&&inputDevice)document.querySelector('#audio-settings').open=true;updateMic();}
