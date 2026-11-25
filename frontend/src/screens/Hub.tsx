@@ -212,6 +212,7 @@ export function Hub({ учитель = false, вошёл = false }: {
   const все = useMemo(() => разделы.flatMap((г) => г.источники), [разделы])
   const поId = useCallback((id: string) => все.find((x) => x.id === id), [все])
 
+  const [фильтр, setФильтр] = useState('')
   const [ищу, setИщу] = useState('')
   const [выбран, setВыбран] = useState<Source>(все[0])
   const [раскрыты, setРаскрыты] = useState<string[]>(() => ['избранное', разделИсточника(все[0].id)])
@@ -266,7 +267,7 @@ export function Hub({ учитель = false, вошёл = false }: {
   }, [любимые, вошёл])
 
   const слово = ищу.trim().toLowerCase()
-  const видно = (x: Source) => !слово || x.name.toLowerCase().includes(слово) || x.gives.toLowerCase().includes(слово)
+  const видно = (x: Source) => (!фильтр || разделИсточника(x.id) === фильтр) && (!слово || x.name.toLowerCase().includes(слово) || x.gives.toLowerCase().includes(слово))
 
   /* 🔴 ИЗБРАННОЕ — ВСЕГДА ПЕРВОЙ ГРУППОЙ, ПО ОБЩИМ ПРАВИЛАМ (владелец, 10.11):
      тот же заголовок со счётчиком, так же сворачивается. Источники в нём —
@@ -400,11 +401,19 @@ export function Hub({ учитель = false, вошёл = false }: {
             placeholder={тр("Найти источник…")}
             aria-label={тр("Найти источник по названию")}
           />
+          <select className={s.find} aria-label={тр("Раздел")} value={фильтр} onChange={(e) => {
+            const id = e.target.value
+            setФильтр(id)
+            setРаскрыты((было) => было.includes(id) ? было : [...было, id])
+          }}>
+            <option value="">{тр("Все разделы")}</option>
+            {разделы.map((р) => <option key={р.id} value={р.id}>{р.имя}</option>)}
+          </select>
           <div className={s.names}>
             {группы.map((г) => {
               const свои = г.источники.filter(видно)
               const моя = г.id === 'избранное'
-              if (свои.length === 0 && !(моя && !слово)) return null
+              if (свои.length === 0 && !(моя && !слово && !фильтр)) return null
               const открыта = Boolean(слово) || раскрыты.includes(г.id)
               return (
                 <section key={г.id} aria-label={г.имя} className={моя ? s.mine : undefined}>

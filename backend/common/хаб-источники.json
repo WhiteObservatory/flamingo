@@ -1,5 +1,725 @@
 [
  {
+  "id": "assembly",
+  "home": "https://sciencegameslab.com/games/anatomy-assembly/",
+  "name": "Anatomy Assembly",
+  "снимок": true
+ },
+ {
+  "id": "skeleton",
+  "home": "https://www.dairy.com.au/education/students/dairy-games/build-a-skeleton",
+  "name": "Build a Skeleton · Dairy Australia",
+  "снимок": true
+ },
+ {
+  "id": "kidworld",
+  "home": "https://kidworld.org/play/science-build-a-skeleton",
+  "name": "Build a Skeleton · KidWorld",
+  "снимок": true
+ },
+ {
+  "id": "studio",
+  "home": "https://www.biodigital.com/product/human-studio",
+  "name": "BioDigital Human Studio",
+  "снимок": true
+ },
+ {
+  "id": "cogni",
+  "home": "https://cogni.cards/anatomy/",
+  "name": "Cogni Anatomy",
+  "снимок": true
+ },
+ {
+  "id": "learn3d",
+  "home": "https://learnanatomy3d.com/",
+  "name": "LearnAnatomy3D",
+  "снимок": true
+ },
+ {
+  "id": "ana3d",
+  "home": "https://ana3d.app/en/",
+  "name": "Ana3D",
+  "снимок": true
+ },
+ {
+  "id": "mazze",
+  "home": "https://www.mazzestudios.com/tools/anatomy-atlas/",
+  "name": "Mazze Studios · 3D Atlas",
+  "снимок": true
+ },
+ {
+  "id": "interface",
+  "home": "https://anatomyinterface.com/",
+  "name": "Anatomy Interface",
+  "снимок": true
+ },
+ {
+  "id": "humanatlas",
+  "home": "https://human-atlas.co/",
+  "name": "Human Atlas",
+  "снимок": true
+ },
+ {
+  "id": "lorea",
+  "home": "https://www.lorea.app/3d-library/human-body-atlas",
+  "name": "Lorea · Human Body Atlas",
+  "снимок": true
+ },
+ {
+  "id": "astraon",
+  "home": "https://astraonlabs.com/atlas/",
+  "name": "Astraon · Human Atlas",
+  "снимок": true
+ },
+ {
+  "id": "skeleton-bio",
+  "home": "https://anatomy.biodigital.com/skeletal-system",
+  "name": "BioDigital · скелет",
+  "снимок": true
+ },
+ {
+  "id": "collections-louvre-fr",
+  "home": "https://collections.louvre.fr/",
+  "name": "Лувр · коллекции",
+  "снимок": true
+ },
+ {
+  "id": "portal-brain-map-org",
+  "home": "https://portal.brain-map.org/",
+  "name": "Allen Brain Atlas",
+  "снимок": true
+ },
+ {
+  "id": "animaldiversity-org",
+  "home": "https://animaldiversity.org/",
+  "name": "Animal Diversity Web",
+  "снимок": true
+ },
+ {
+  "id": "ccsb-scripps-edu-cellpaint",
+  "home": "https://ccsb.scripps.edu/cellpaint/",
+  "name": "CellPAINT",
+  "снимок": true
+ },
+ {
+  "id": "climatereanalyzer-org",
+  "home": "https://climatereanalyzer.org/",
+  "name": "Climate Reanalyzer",
+  "снимок": true
+ },
+ {
+  "id": "desmos-com-geometry",
+  "home": "https://www.desmos.com/geometry",
+  "name": "Desmos · геометрия",
+  "снимок": true
+ },
+ {
+  "id": "desmos-com-calculator",
+  "home": "https://www.desmos.com/calculator",
+  "name": "Desmos · графики",
+  "снимок": true
+ },
+ {
+  "id": "desmos-com-3d",
+  "home": "https://www.desmos.com/3d",
+  "name": "Desmos · графики в 3D",
+  "снимок": true
+ },
+ {
+  "id": "ebird-org-map",
+  "home": "https://ebird.org/map",
+  "name": "eBird · карты наблюдений",
+  "снимок": true
+ },
+ {
+  "id": "sky-esa-int",
+  "home": "https://sky.esa.int/",
+  "name": "ESASky",
+  "снимок": true
+ },
+ {
+  "id": "mapper-obis-org",
+  "home": "https://mapper.obis.org/",
+  "name": "Explore the ocean · Ocean Biodiversity Information System",
+  "снимок": true
+ },
+ {
+  "id": "gapminder-org-tools",
+  "home": "https://www.gapminder.org/tools/",
+  "name": "Gapminder Tools",
+  "снимок": true
+ },
+ {
+  "id": "globalforestwatch-org-map",
+  "home": "https://www.globalforestwatch.org/map/",
+  "name": "Global Forest Watch",
+  "снимок": true
+ },
+ {
+  "id": "proteinatlas-org",
+  "home": "https://www.proteinatlas.org/",
+  "name": "Human Protein Atlas",
+  "снимок": true
+ },
+ {
+  "id": "learningmusic-ableton-com",
+  "home": "https://learningmusic.ableton.com/",
+  "name": "Learning Music · Ableton",
+  "снимок": true
+ },
+ {
+  "id": "learningsynths-ableton-com",
+  "home": "https://learningsynths.ableton.com/",
+  "name": "Learning Synths · Ableton",
+  "снимок": true
+ },
+ {
+  "id": "polypad-amplify-com-p",
+  "home": "https://polypad.amplify.com/p",
+  "name": "Mathigon Polypad",
+  "снимок": true
+ },
+ {
+  "id": "ocw-mit-edu",
+  "home": "https://ocw.mit.edu/",
+  "name": "MIT OpenCourseWare",
+  "снимок": true
+ },
+ {
+  "id": "molview-org",
+  "home": "https://molview.org/",
+  "name": "MolView · модели молекул",
+  "снимок": true
+ },
+ {
+  "id": "musicca-com-exercises",
+  "home": "https://www.musicca.com/exercises",
+  "name": "Musicca",
+  "снимок": true
+ },
+ {
+  "id": "climate-nasa-gov-interactives-climate-time-machine",
+  "home": "https://climate.nasa.gov/interactives/climate-time-machine/",
+  "name": "NASA Climate Time Machine",
+  "снимок": true
+ },
+ {
+  "id": "eyes-nasa-gov-apps-asteroids",
+  "home": "https://eyes.nasa.gov/apps/asteroids/",
+  "name": "NASA Eyes · астероиды",
+  "снимок": true
+ },
+ {
+  "id": "eyes-nasa-gov-apps-solar-system",
+  "home": "https://eyes.nasa.gov/apps/solar-system/",
+  "name": "NASA Eyes · Солнечная система",
+  "снимок": true
+ },
+ {
+  "id": "eyes-nasa-gov-apps-exo",
+  "home": "https://eyes.nasa.gov/apps/exo/",
+  "name": "NASA Eyes · экзопланеты",
+  "снимок": true
+ },
+ {
+  "id": "firms-modaps-eosdis-nasa-gov-map",
+  "home": "https://firms.modaps.eosdis.nasa.gov/map/",
+  "name": "NASA FIRMS",
+  "снимок": true
+ },
+ {
+  "id": "nobaproject-com",
+  "home": "https://nobaproject.com/",
+  "name": "Noba",
+  "снимок": true
+ },
+ {
+  "id": "oldmapsonline-org",
+  "home": "https://www.oldmapsonline.org/",
+  "name": "Old Maps Online",
+  "снимок": true
+ },
+ {
+  "id": "onezoom-org",
+  "home": "https://www.onezoom.org/",
+  "name": "OneZoom · древо жизни",
+  "снимок": true
+ },
+ {
+  "id": "openinframap-org",
+  "home": "https://openinframap.org/",
+  "name": "OpenInfraMap",
+  "снимок": true
+ },
+ {
+  "id": "open-edu-openlearn",
+  "home": "https://www.open.edu/openlearn/",
+  "name": "OpenLearn",
+  "снимок": true
+ },
+ {
+  "id": "openrailwaymap-org",
+  "home": "https://www.openrailwaymap.org/",
+  "name": "OpenRailwayMap",
+  "снимок": true
+ },
+ {
+  "id": "map-openseamap-org",
+  "home": "https://map.openseamap.org/",
+  "name": "OpenSeaMap",
+  "снимок": true
+ },
+ {
+  "id": "opentopomap-org",
+  "home": "https://opentopomap.org/",
+  "name": "OpenTopoMap",
+  "снимок": true
+ },
+ {
+  "id": "perseus-tufts-edu-hopper",
+  "home": "https://www.perseus.tufts.edu/hopper/",
+  "name": "Perseus Digital Library",
+  "снимок": true
+ },
+ {
+  "id": "phet-states-of-matter",
+  "home": "https://phet.colorado.edu/en/simulations/states-of-matter",
+  "name": "PhET · Агрегатные состояния",
+  "снимок": true
+ },
+ {
+  "id": "phet-wave-on-a-string",
+  "home": "https://phet.colorado.edu/en/simulations/wave-on-a-string",
+  "name": "PhET · Волна на струне",
+  "снимок": true
+ },
+ {
+  "id": "phet-geometric-optics",
+  "home": "https://phet.colorado.edu/en/simulations/geometric-optics",
+  "name": "PhET · Геометрическая оптика",
+  "снимок": true
+ },
+ {
+  "id": "phet-gravity-force-lab",
+  "home": "https://phet.colorado.edu/en/simulations/gravity-force-lab",
+  "name": "PhET · Гравитационные силы",
+  "снимок": true
+ },
+ {
+  "id": "phet-gravity-and-orbits",
+  "home": "https://phet.colorado.edu/en/simulations/gravity-and-orbits",
+  "name": "PhET · Гравитация и орбиты",
+  "снимок": true
+ },
+ {
+  "id": "phet-graphing-lines",
+  "home": "https://phet.colorado.edu/en/simulations/graphing-lines",
+  "name": "PhET · Графики прямых",
+  "снимок": true
+ },
+ {
+  "id": "phet-masses-and-springs",
+  "home": "https://phet.colorado.edu/en/simulations/masses-and-springs",
+  "name": "PhET · Грузы и пружины",
+  "снимок": true
+ },
+ {
+  "id": "phet-projectile-motion",
+  "home": "https://phet.colorado.edu/en/simulations/projectile-motion",
+  "name": "PhET · Движение под углом",
+  "снимок": true
+ },
+ {
+  "id": "phet-diffusion",
+  "home": "https://phet.colorado.edu/en/simulations/diffusion",
+  "name": "PhET · Диффузия",
+  "снимок": true
+ },
+ {
+  "id": "phet-natural-selection",
+  "home": "https://phet.colorado.edu/en/simulations/natural-selection",
+  "name": "PhET · Естественный отбор",
+  "снимок": true
+ },
+ {
+  "id": "phet-hookes-law",
+  "home": "https://phet.colorado.edu/en/simulations/hookes-law",
+  "name": "PhET · Закон Гука",
+  "снимок": true
+ },
+ {
+  "id": "phet-ohms-law",
+  "home": "https://phet.colorado.edu/en/simulations/ohms-law",
+  "name": "PhET · Закон Ома",
+  "снимок": true
+ },
+ {
+  "id": "phet-faradays-law",
+  "home": "https://phet.colorado.edu/en/simulations/faradays-law",
+  "name": "PhET · Закон Фарадея",
+  "снимок": true
+ },
+ {
+  "id": "phet-charges-and-fields",
+  "home": "https://phet.colorado.edu/en/simulations/charges-and-fields",
+  "name": "PhET · Заряды и поля",
+  "снимок": true
+ },
+ {
+  "id": "phet-fractions-intro",
+  "home": "https://phet.colorado.edu/en/simulations/fractions-intro",
+  "name": "PhET · Знакомство с дробями",
+  "снимок": true
+ },
+ {
+  "id": "phet-isotopes-and-atomic-mass",
+  "home": "https://phet.colorado.edu/en/simulations/isotopes-and-atomic-mass",
+  "name": "PhET · Изотопы",
+  "снимок": true
+ },
+ {
+  "id": "phet-wave-interference",
+  "home": "https://phet.colorado.edu/en/simulations/wave-interference",
+  "name": "PhET · Интерференция волн",
+  "снимок": true
+ },
+ {
+  "id": "phet-graphing-quadratics",
+  "home": "https://phet.colorado.edu/en/simulations/graphing-quadratics",
+  "name": "PhET · Квадратичные функции",
+  "снимок": true
+ },
+ {
+  "id": "phet-acid-base-solutions",
+  "home": "https://phet.colorado.edu/en/simulations/acid-base-solutions",
+  "name": "PhET · Кислоты и основания",
+  "снимок": true
+ },
+ {
+  "id": "phet-capacitor-lab-basics",
+  "home": "https://phet.colorado.edu/en/simulations/capacitor-lab-basics",
+  "name": "PhET · Конденсатор",
+  "снимок": true
+ },
+ {
+  "id": "phet-function-builder",
+  "home": "https://phet.colorado.edu/en/simulations/function-builder",
+  "name": "PhET · Конструктор функций",
+  "снимок": true
+ },
+ {
+  "id": "phet-concentration",
+  "home": "https://phet.colorado.edu/en/simulations/concentration",
+  "name": "PhET · Концентрация",
+  "снимок": true
+ },
+ {
+  "id": "phet-least-squares-regression",
+  "home": "https://phet.colorado.edu/en/simulations/least-squares-regression",
+  "name": "PhET · Линейная регрессия",
+  "снимок": true
+ },
+ {
+  "id": "phet-pendulum-lab",
+  "home": "https://phet.colorado.edu/en/simulations/pendulum-lab",
+  "name": "PhET · Маятник",
+  "снимок": true
+ },
+ {
+  "id": "phet-molarity",
+  "home": "https://phet.colorado.edu/en/simulations/molarity",
+  "name": "PhET · Молярность",
+  "снимок": true
+ },
+ {
+  "id": "phet-neuron",
+  "home": "https://phet.colorado.edu/en/simulations/neuron",
+  "name": "PhET · Нейрон",
+  "снимок": true
+ },
+ {
+  "id": "phet-greenhouse-effect",
+  "home": "https://phet.colorado.edu/en/simulations/greenhouse-effect",
+  "name": "PhET · Парниковый эффект",
+  "снимок": true
+ },
+ {
+  "id": "phet-membrane-transport",
+  "home": "https://phet.colorado.edu/en/simulations/membrane-transport",
+  "name": "PhET · Перенос через мембрану",
+  "снимок": true
+ },
+ {
+  "id": "phet-density",
+  "home": "https://phet.colorado.edu/en/simulations/density",
+  "name": "PhET · Плотность",
+  "снимок": true
+ },
+ {
+  "id": "phet-area-model-algebra",
+  "home": "https://phet.colorado.edu/en/simulations/area-model-algebra",
+  "name": "PhET · Площадь и алгебра",
+  "снимок": true
+ },
+ {
+  "id": "phet-area-builder",
+  "home": "https://phet.colorado.edu/en/simulations/area-builder",
+  "name": "PhET · Площадь и периметр",
+  "снимок": true
+ },
+ {
+  "id": "phet-fraction-matcher",
+  "home": "https://phet.colorado.edu/en/simulations/fraction-matcher",
+  "name": "PhET · Подбор дробей",
+  "снимок": true
+ },
+ {
+  "id": "phet-curve-fitting",
+  "home": "https://phet.colorado.edu/en/simulations/curve-fitting",
+  "name": "PhET · Подбор кривой",
+  "снимок": true
+ },
+ {
+  "id": "phet-molecule-polarity",
+  "home": "https://phet.colorado.edu/en/simulations/molecule-polarity",
+  "name": "PhET · Полярность молекул",
+  "снимок": true
+ },
+ {
+  "id": "phet-bending-light",
+  "home": "https://phet.colorado.edu/en/simulations/bending-light",
+  "name": "PhET · Преломление света",
+  "снимок": true
+ },
+ {
+  "id": "phet-fractions-equality",
+  "home": "https://phet.colorado.edu/en/simulations/fractions-equality",
+  "name": "PhET · Равенство дробей",
+  "снимок": true
+ },
+ {
+  "id": "phet-balancing-act",
+  "home": "https://phet.colorado.edu/en/simulations/balancing-act",
+  "name": "PhET · Равновесие рычага",
+  "снимок": true
+ },
+ {
+  "id": "phet-reactants-products-and-leftovers",
+  "home": "https://phet.colorado.edu/en/simulations/reactants-products-and-leftovers",
+  "name": "PhET · Реагенты и остатки",
+  "снимок": true
+ },
+ {
+  "id": "phet-gas-properties",
+  "home": "https://phet.colorado.edu/en/simulations/gas-properties",
+  "name": "PhET · Свойства газов",
+  "снимок": true
+ },
+ {
+  "id": "phet-forces-and-motion-basics",
+  "home": "https://phet.colorado.edu/en/simulations/forces-and-motion-basics",
+  "name": "PhET · Силы и движение",
+  "снимок": true
+ },
+ {
+  "id": "phet-vector-addition",
+  "home": "https://phet.colorado.edu/en/simulations/vector-addition",
+  "name": "PhET · Сложение векторов",
+  "снимок": true
+ },
+ {
+  "id": "phet-resistance-in-a-wire",
+  "home": "https://phet.colorado.edu/en/simulations/resistance-in-a-wire",
+  "name": "PhET · Сопротивление провода",
+  "снимок": true
+ },
+ {
+  "id": "phet-collision-lab",
+  "home": "https://phet.colorado.edu/en/simulations/collision-lab",
+  "name": "PhET · Столкновения",
+  "снимок": true
+ },
+ {
+  "id": "phet-build-an-atom",
+  "home": "https://phet.colorado.edu/en/simulations/build-an-atom",
+  "name": "PhET · Строим атом",
+  "снимок": true
+ },
+ {
+  "id": "phet-plate-tectonics",
+  "home": "https://phet.colorado.edu/en/simulations/plate-tectonics",
+  "name": "PhET · Тектоника плит",
+  "снимок": true
+ },
+ {
+  "id": "phet-trig-tour",
+  "home": "https://phet.colorado.edu/en/simulations/trig-tour",
+  "name": "PhET · Тригонометрический круг",
+  "снимок": true
+ },
+ {
+  "id": "phet-unit-rates",
+  "home": "https://phet.colorado.edu/en/simulations/unit-rates",
+  "name": "PhET · Удельные величины",
+  "снимок": true
+ },
+ {
+  "id": "phet-molecule-shapes",
+  "home": "https://phet.colorado.edu/en/simulations/molecule-shapes",
+  "name": "PhET · Форма молекулы",
+  "снимок": true
+ },
+ {
+  "id": "phet-balancing-chemical-equations",
+  "home": "https://phet.colorado.edu/en/simulations/balancing-chemical-equations",
+  "name": "PhET · Химические уравнения",
+  "снимок": true
+ },
+ {
+  "id": "phet-color-vision",
+  "home": "https://phet.colorado.edu/en/simulations/color-vision",
+  "name": "PhET · Цветовое зрение",
+  "снимок": true
+ },
+ {
+  "id": "phet-ph-scale",
+  "home": "https://phet.colorado.edu/en/simulations/ph-scale",
+  "name": "PhET · Шкала pH",
+  "снимок": true
+ },
+ {
+  "id": "phet-gene-expression-essentials",
+  "home": "https://phet.colorado.edu/en/simulations/gene-expression-essentials",
+  "name": "PhET · Экспрессия генов",
+  "снимок": true
+ },
+ {
+  "id": "phet-energy-skate-park",
+  "home": "https://phet.colorado.edu/en/simulations/energy-skate-park",
+  "name": "PhET · Энергия на скейт-площадке",
+  "снимок": true
+ },
+ {
+  "id": "populationpyramid-net",
+  "home": "https://www.populationpyramid.net/",
+  "name": "Population Pyramid",
+  "снимок": true
+ },
+ {
+  "id": "stellarium-web-org",
+  "home": "https://stellarium-web.org/",
+  "name": "Stellarium Web",
+  "снимок": true
+ },
+ {
+  "id": "teoria-com",
+  "home": "https://www.teoria.com/",
+  "name": "Teoria",
+  "снимок": true
+ },
+ {
+  "id": "art-thewalters-org",
+  "home": "https://art.thewalters.org/",
+  "name": "The Walters Art Museum",
+  "снимок": true
+ },
+ {
+  "id": "slavevoyages-org",
+  "home": "https://www.slavevoyages.org/",
+  "name": "Trans-Atlantic Slave Trade Database",
+  "снимок": true
+ },
+ {
+  "id": "data-un-org",
+  "home": "https://data.un.org/",
+  "name": "UN Data",
+  "снимок": true
+ },
+ {
+  "id": "databrowser-uis-unesco-org",
+  "home": "https://databrowser.uis.unesco.org/",
+  "name": "UNESCO Institute for Statistics",
+  "снимок": true
+ },
+ {
+  "id": "ventusky-com",
+  "home": "https://www.ventusky.com/",
+  "name": "Ventusky",
+  "снимок": true
+ },
+ {
+  "id": "walter-fendt-de-html5-phen",
+  "home": "https://www.walter-fendt.de/html5/phen/",
+  "name": "Walter Fendt",
+  "снимок": true
+ },
+ {
+  "id": "windy-com",
+  "home": "https://www.windy.com/",
+  "name": "Windy",
+  "снимок": true
+ },
+ {
+  "id": "worldwidetelescope-org-webclient",
+  "home": "https://worldwidetelescope.org/webclient/",
+  "name": "WorldWide Telescope",
+  "снимок": true
+ },
+ {
+  "id": "biodigital",
+  "home": "https://human.biodigital.com/",
+  "name": "BioDigital Human · анатомия",
+  "снимок": true
+ },
+ {
+  "id": "zygote",
+  "home": "https://www.zygotebody.com/",
+  "name": "Zygote Body · слои тела",
+  "снимок": true
+ },
+ {
+  "id": "cellscale",
+  "home": "https://learn.genetics.utah.edu/content/cells/scale/",
+  "name": "Размеры клеток",
+  "снимок": true
+ },
+ {
+  "id": "phet-dc",
+  "home": "https://phet.colorado.edu/ru/simulations/circuit-construction-kit-dc",
+  "name": "PhET · электрические цепи",
+  "снимок": true
+ },
+ {
+  "id": "chemcollective",
+  "home": "https://chemcollective.org/vlab/vlab.php",
+  "name": "ChemCollective · химическая лаборатория",
+  "снимок": true
+ },
+ {
+  "id": "geogebra3d",
+  "home": "https://www.geogebra.org/3d",
+  "name": "GeoGebra · геометрия в 3D",
+  "снимок": true
+ },
+ {
+  "id": "nullschool",
+  "home": "https://earth.nullschool.net/",
+  "name": "Earth Nullschool · ветер и океан",
+  "снимок": true
+ },
+ {
+  "id": "apollo11",
+  "home": "https://3d.si.edu/object/nasm_A19700102000",
+  "name": "Smithsonian 3D · Аполлон-11",
+  "снимок": true
+ },
+ {
+  "id": "songmaker",
+  "home": "https://musiclab.chromeexperiments.com/Song-Maker/",
+  "name": "Song Maker · музыкальная лаборатория",
+  "снимок": true
+ },
+ {
   "id": "apod",
   "home": "https://apod.nasa.gov/apod/astropix.html",
   "name": "NASA · снимок дня",
