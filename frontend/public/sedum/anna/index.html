@@ -36,8 +36,7 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
 @media(max-width:440px){.subject{display:none}}
 @media(max-width:680px){.teacher .portrait,.teacher .pupil-video{max-height:118px}.workspace .surface{margin-bottom:8px}.workspace[data-active=true] .question[data-short=true]{margin:12px 0 16px}.workspace .board{margin:12px 0 4px}}
 </style>
-<section id="pilot-gate" style="max-width:42rem;margin:10vh auto;padding:24px"><h1>Математика с Анной</h1><p role="status" id="pilot-state">Проверяем доступ к голосовому уроку…</p><a href="/вход">Войти в Flamingo</a> · <a href="/sedum/research-cabinet.html">В научный кабинет</a></section>
-<div id="pilot-room" hidden>
+<div id="pilot-room">
 <header><div class="top"><span class="brand">flamingo.</span><span class="subject">Математика</span><button id="end" type="button">Закончить урок</button></div></header>
 <main><nav class="views" aria-label="Вид занятия">
  <button type="button" data-view="board" aria-pressed="true">Доска</button>
@@ -45,8 +44,11 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
  <button type="button" data-view="materials" aria-pressed="false">Материалы</button>
 </nav><div class="room" data-view="board"><section class="workspace" aria-labelledby="title"><div class="surface">Доска занятия</div><h1 id="title">Что означает дробь</h1>
 <div id="lesson-entry">
+ <p>Привет! Сегодня разберёмся, что означает дробь.</p>
  <p><label><input type="checkbox" id="test-trace"> Тестовый прогон · локальный журнал реплик и микрофона</label></p>
  <button type="button" class="primary" id="start-lesson">Начать урок</button>
+ <p role="status" id="pilot-state"></p>
+ <a id="pilot-login" href="/вход" hidden>Войти в Flamingo</a>
 </div>
 <p id="current-question" class="question" aria-live="polite"></p>
 <div id="lesson-work" hidden>
@@ -72,7 +74,7 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
 </div></div>
 <div class="pupil"><video id="pupil-video" class="pupil-video" autoplay muted playsinline hidden></video><span id="pupil-name" class="pupil-id">Ты</span><p id="pupil-off" class="pupil-off">Камера выключена</p><p id="camera-note" role="status" class="teacher-note" hidden></p></div></aside>
 </div></main>
-<footer class="control-dock"><div class="audio"><button id="mic" type="button" hidden>Ответить голосом</button>
+<footer class="control-dock" inert><div class="audio"><button id="mic" type="button" hidden>Ответить голосом</button>
 <button id="handsfree" type="button" aria-pressed="false" aria-label="Включить голосовой разговор">Микрофон</button>
 <span id="voice-state" class="voice-state" role="status">Микрофон выключен</span>
 <button id="camera-toggle" type="button" aria-pressed="false">Включить камеру</button>
@@ -96,16 +98,6 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
 </div>
 <script type="module">
 import {firstLesson,secondLesson,thirdLesson,voiceTurn,lessonWelcome,lessonTopic,isWelcomeStop,spokenMath,difficultyVoice,confirmDifficulty} from './tutor-lesson.mjs';
-const gate=document.querySelector('#pilot-gate');
-try {
- const response=await fetch('https://api.flamingo.plus/api/anna/ready',{credentials:'include',cache:'no-store',signal:AbortSignal.timeout(6000)});
- if(response.status!==204) throw new Error(String(response.status));
- document.querySelector('#pilot-room').hidden=false;
- gate.hidden=true;
-} catch(error) {
- document.querySelector('#pilot-state').textContent=error.message==='403'?'Для закрытого теста нужен аккаунт владельца Flamingo.':'Голосовой кабинет пока недоступен. Обнови страницу после подключения Анны.';
- throw new Error('Вход в пилот не открыт');
-}
 const output=document.querySelector('#output'),form=document.querySelector('form'),end=document.querySelector('#end'),reply=document.querySelector('#reply');
 const currentQuestion=document.querySelector('#current-question'),voiceState=document.querySelector('#voice-state');
 const room=document.querySelector('.room'),viewButtons=document.querySelectorAll?.('.views [data-view]')??[];
@@ -486,8 +478,20 @@ function enterExercises(){
  lockAnswer(false);
  return 'А теперь тема урока: '+document.querySelector('#title').textContent+'. Если что-то непонятно, спрашивай. '+tutor.opening;
 }
-document.querySelector('#start-lesson')?.addEventListener('click',()=>{
+document.querySelector('#start-lesson')?.addEventListener('click',async event=>{
  if(stage!=='setup'||tutor.snapshot().done)return;
+ const start=event.currentTarget, message=document.querySelector('#pilot-state'),login=document.querySelector('#pilot-login');
+ start.disabled=true;login.hidden=true;message.textContent='Подключаем Анну…';
+ try {
+  const res=await fetch('https://api.flamingo.plus/api/anna/ready',{credentials:'include',cache:'no-store',signal:AbortSignal.timeout(6000)});
+  if(res.status!==204)throw new Error(String(res.status));
+ } catch(error) {
+  login.hidden=!['401','403'].includes(error.message);
+  message.textContent=login.hidden?'Не удалось подключить Анну. Попробуй начать урок ещё раз.':'Для голосового урока войди под аккаунтом владельца Flamingo.';
+  start.disabled=false;return;
+ }
+ if(stage!=='setup'||tutor.snapshot().done)return;
+ document.querySelector('.control-dock').inert=false;
  if(document.querySelector('#test-trace').checked){traceRun=crypto.randomUUID();trace('start','Урок 1 · Что означает дробь');}
  const greeting=lessonWelcome(welcomeOptions);
  entry.hidden=true;
