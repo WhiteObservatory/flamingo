@@ -274,6 +274,10 @@ function Экраны() {
     setPerson(p)
     setУзнали(true)
     rememberName(p.name)
+    if (new URLSearchParams(location.search).get('from') === 'anna' && decodeURIComponent(location.pathname) === '/вход') {
+      location.replace('/sedum/anna/')
+      return
+    }
     /* После входа и регистрации — на главную (решение 31.10): там дверь
        «Войти в кабинет». Если звали с конкретной страницы — туда. */
     go(после ?? '/')

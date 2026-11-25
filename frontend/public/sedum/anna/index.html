@@ -45,10 +45,9 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
 </nav><div class="room" data-view="board"><section class="workspace" aria-labelledby="title"><div class="surface">Доска занятия</div><h1 id="title">Что означает дробь</h1>
 <div id="lesson-entry">
  <p>Привет! Сегодня разберёмся, что означает дробь.</p>
- <p><label><input type="checkbox" id="test-trace"> Тестовый прогон · локальный журнал реплик и микрофона</label></p>
- <button type="button" class="primary" id="start-lesson">Начать урок</button>
+ <button type="button" class="primary" id="start-lesson" hidden>Повторить подключение</button>
  <p role="status" id="pilot-state"></p>
- <a id="pilot-login" href="/вход" hidden>Войти в Flamingo</a>
+ <a id="pilot-login" href="/вход?from=anna" hidden>Войти и вернуться к уроку</a>
 </div>
 <p id="current-question" class="question" aria-live="polite"></p>
 <div id="lesson-work" hidden>
@@ -80,6 +79,7 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
 <button id="camera-toggle" type="button" aria-pressed="false">Включить камеру</button>
 <button id="text-toggle" class="primary" type="button" aria-expanded="false" aria-controls="text-form">Ответить текстом</button>
 <details id="audio-settings"><summary>Настройки звука</summary>
+ <label><input type="checkbox" id="test-trace"> Тестовый журнал реплик с этого момента</label>
 <p><label for="input-device">Микрофон</label> <select id="input-device"><option value="">Автовыбор · предпочитать микрофон компьютера</option></select></p>
 <p id="active-device" class="muted"></p>
 <p id="voice-latency" class="muted" hidden></p>
@@ -94,6 +94,7 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
  </details></div>
  <form id="text-form" hidden><label id="reply-label" for="reply">Твой ответ</label><input id="reply" required maxlength="500" autocomplete="off"><button class="primary">Отправить</button></form>
  <p id="audio-status" role="status"></p>
+ <button hidden type="button" id="resume-speech">Включить звук Анны</button>
 </footer>
 </div>
 <script type="module">
@@ -429,7 +430,13 @@ function say(text,preview=false){
      latencyLine.hidden=false;
      trace('audio','Начало ответа Анны',{ms:Math.round(performance.now()-measuredEnd)});
     };
-    await lessonAudio.play();
+    try { await lessonAudio.play(); }
+    catch(error){
+     if(error.name!=='NotAllowedError')throw error;
+     const resume=document.querySelector('#resume-speech');resume.hidden=false;
+     status.textContent='Браузер ждёт касания для включения звука.';
+     resume.onclick=()=>{resume.hidden=true;if(revision===speechRevision)lessonAudio.play().catch(handleError);};
+    }
   };
   void showPart(0).catch(handleError);
   return;
@@ -478,27 +485,40 @@ function enterExercises(){
  lockAnswer(false);
  return 'А теперь тема урока: '+document.querySelector('#title').textContent+'. Если что-то непонятно, спрашивай. '+tutor.opening;
 }
-document.querySelector('#start-lesson')?.addEventListener('click',async event=>{
+async function enterAnna(){
  if(stage!=='setup'||tutor.snapshot().done)return;
- const start=event.currentTarget, message=document.querySelector('#pilot-state'),login=document.querySelector('#pilot-login');
- start.disabled=true;login.hidden=true;message.textContent='Подключаем Анну…';
+ const start=document.querySelector('#start-lesson'), message=document.querySelector('#pilot-state'),login=document.querySelector('#pilot-login');
+ start.disabled=true;start.hidden=true;login.hidden=true;message.textContent='Подключаем Анну…';
  try {
   const res=await fetch('https://api.flamingo.plus/api/anna/ready',{credentials:'include',cache:'no-store',signal:AbortSignal.timeout(6000)});
-  if(res.status!==204)throw new Error(String(res.status));
+  if([401,403].includes(res.status)){
+   const me=await fetch('https://api.flamingo.plus/api/auth/me',{credentials:'include',cache:'no-store',signal:AbortSignal.timeout(6000)});
+   if(!me.ok)throw new Error('offline');
+   const session=await me.json();
+   if(session.person===null){login.hidden=false;message.textContent='Войди, чтобы продолжить урок.';return;}
+   if(!session.person?.id)throw new Error('offline');
+   message.textContent='Ты уже в Flamingo. У этого аккаунта пока нет доступа к закрытому уроку Анны.';return;
+  }
+  if(res.status!==204)throw new Error('offline');
  } catch(error) {
-  login.hidden=!['401','403'].includes(error.message);
-  message.textContent=login.hidden?'Не удалось подключить Анну. Попробуй начать урок ещё раз.':'Для голосового урока войди под аккаунтом владельца Flamingo.';
-  start.disabled=false;return;
+  message.textContent='Не удалось подключить Анну. Можно повторить без нового входа.';
+  start.disabled=false;start.hidden=false;return;
  }
  if(stage!=='setup'||tutor.snapshot().done)return;
  document.querySelector('.control-dock').inert=false;
- if(document.querySelector('#test-trace').checked){traceRun=crypto.randomUUID();trace('start','Урок 1 · Что означает дробь');}
  const greeting=lessonWelcome(welcomeOptions);
  entry.hidden=true;
  const pupilName=document.querySelector('#pupil-name');
  if(pupilName)pupilName.textContent=welcomeOptions.student+' · ты';
  stage='welcome';document.querySelector('#reply-label').textContent='Как настроение?';
- lockAnswer(false);display(greeting);reply.focus();
+ lockAnswer(false);sound.checked=true;autoTalk=true;
+ handsfree.setAttribute('aria-pressed','true');handsfree.setAttribute('aria-label','Выключить голосовой разговор');
+ cameraButton.click();display(greeting);
+}
+document.querySelector('#start-lesson').addEventListener('click',enterAnna);
+document.querySelector('#test-trace').addEventListener('change',e=>{
+ if(e.target.checked){traceRun=crypto.randomUUID();trace('start','Включён журнал урока');}
+ else traceRun=null;
 });
 async function submitReply(text,source='text'){
  if(stage==='lesson'){
@@ -722,4 +742,6 @@ mic.addEventListener('click',async()=>{
 form.addEventListener('submit',async e=>{e.preventDefault();if(!answerStage()||coachBusy||tutor.snapshot().done)return;const value=reply.value.trim();if(!value)return;
  if(recognition){const r=recognition;recognition=null;r.abort();status.textContent='';}
  reply.value='';add('Ученик: '+value);display(await submitReply(value));});
+void enterAnna();
+window.addEventListener('pagehide',()=>{disableAuto();recognition?.abort();speechRevision++;cancelLessonAudio();});
 </script></html>
