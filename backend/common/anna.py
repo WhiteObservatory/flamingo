@@ -16,28 +16,29 @@ def pilot(request, action):
     probe = action == "ready"
     if request.method != ("GET" if probe else "POST"):
         return HttpResponse(status=405)
-    if not probe and action not in ("voice", "listen", "coach", "trace"):
+    if not probe and action not in ("voice", "listen", "coach", "trace", "film"):
         return HttpResponse(status=404)
-    content = "audio/wav" if action == "listen" else "application/json"
+    content = "audio/wav" if action in ("listen", "film") else "application/json"
     if not probe and request.content_type != content:
         return HttpResponse(status=415)
-    limit = 330000 if action == "listen" else 4096
+    limit = 5000000 if action == "film" else 330000 if action == "listen" else 4096
     body = request.read(limit + 1)
     if len(body) > limit:
         return HttpResponse(status=413)
-    upstream = HTTPConnection("127.0.0.1", 28466, timeout=27)
+    upstream = HTTPConnection("127.0.0.1", 28469, timeout=55)
     try:
         upstream.request("GET" if probe else "POST", "/" if probe else "/lesson-" + action,
                          body=None if probe else body,
-                         headers={"Origin": "http://127.0.0.1:18466", "Content-Type": content})
+                         headers={"Origin": "http://127.0.0.1:18469", "Content-Type": content})
         res = upstream.getresponse()
         if probe:
             return HttpResponse(status=204 if res.status == 200 and b"tutor-lesson.mjs" in res.read(100000) else 503)
-        data = res.read(5000001)
-        if len(data) > 5000000:
+        max_response = 10000000 if action == "film" else 5000000
+        data = res.read(max_response + 1)
+        if len(data) > max_response:
             return HttpResponse(status=502)
         return HttpResponse(data, status=res.status,
-                            content_type="audio/wav" if action == "voice" else "application/json")
+                            content_type="video/mp4" if action == "film" else "audio/wav" if action == "voice" else "application/json")
     except (OSError, HTTPException):
         return HttpResponse(status=503)
     finally:
