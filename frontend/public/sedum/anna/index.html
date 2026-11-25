@@ -431,7 +431,7 @@ function explainOnBoard(text){
   const parts=['Верхнее число, '+n+', — числитель. Оно показывает, сколько частей закрасили.','Нижнее число, '+d+', — знаменатель. Оно показывает, сколько равных частей всего.'];
   const calm=write&&n===2&&d===5&&demo.value==='kseniya';
   if(n===2&&d===5&&demo.value==='kseniya-ref')parts[1]='Посмотри вниз. Здесь стоит число пять. Это знаменатель: он показывает, сколько равных частей всего. Значит, закрашены две пятых.';
-  boardSpeech={text:calm?'Полоску разделили на пять равных частей. Две из них закрасили. Поэтому закрашенная доля — две пятых.':parts.join(' '),parts,guide,calm};
+  boardSpeech={text:calm?'Полоску разделили на пять равных частей. Две из них закрасили. Поэтому закрашенная доля — две пятых.':parts.join(' '),parts,guide,calm,twoFifths:n===2&&d===5};
  }
  explanation.hidden=false;showView('board');
  trace('board',(circle?'круг':contextual||write?'схема дроби':'полоска')+' '+n+'/'+d);
@@ -483,18 +483,32 @@ function say(text,preview=false){
   const handleError=()=>{if(revision===speechRevision){trace('audio','Сбой озвучки');status.textContent='Не удалось озвучить реплику. Текст доступен в диалоге.';finish();}};
   const cues=diagram?diagram.parts.map(spokenMath):[lineText];
   const playReply=async ()=>{
+    const preset=demo.value!=='kseniya-ref'?null:diagram?.twoFifths?'two-fifths-v2.mp4':
+      lineText==='Поняла. Сейчас начнём урок, а к заданию сможешь вернуться после него. А теперь тема урока: Что означает дробь. Если что-то непонятно, спрашивай. Полоску разделили на пять равных частей. Две закрасили. Какая доля закрашена?'?'intro-fractions-v2.mp4':null;
+    if(preset){
+     calmVideo.src='./'+preset;idle.pause();idle.style.display='none';calmPortrait.style.display='none';calmVideo.style.display='block';
+     calmVideo.ontimeupdate=()=>{if(diagram)diagram.guide.dataset.focus=calmVideo.currentTime<5.52?'top':'bottom'};
+     calmVideo.onended=()=>{trace('audio','Видео проиграно до конца: '+preset,{ms:Math.round(calmVideo.currentTime*1000)});finish()};
+     const play=async()=>{await calmVideo.play();if(revision===speechRevision){status.textContent='';trace('audio','Начато воспроизведение: '+preset,measuredEnd===null?{}:{ms:Math.round(performance.now()-measuredEnd)})}};
+     try{await play();return}catch(e){
+      if(revision!==speechRevision)return;
+      if(e.name==='NotAllowedError'){const resume=document.querySelector('#resume-speech');resume.hidden=false;status.textContent='Нажми, чтобы услышать Анну.';resume.onclick=()=>{resume.hidden=true;if(revision===speechRevision)play().catch(handleError)};return}
+      trace('audio','Не загружен готовый ролик: '+preset);
+     }
+    }
     const clips=[];
     for(const cue of cues)clips.push(await requestVoice(cue));
     const {wav,starts}=joinSpeech(clips);
     if(revision!==speechRevision)return;
     if(['kseniya','kseniya-ref'].includes(demo.value)){
+     try{
      status.textContent='Анна готовит ответ…';
      let res;
      do{
       res=await fetch('https://api.flamingo.plus/api/anna/film',{credentials:'include',method:'POST',headers:{'Content-Type':'audio/wav'},body:wav,signal:controller.signal});
       if(res.status===429)await new Promise(ok=>setTimeout(ok,800));
      }while(res.status===429&&!controller.signal.aborted);
-     if(!res.ok)throw Error('video');
+     if(!res.ok)throw Error('HTTP '+res.status);
      const clip=await res.blob();if(revision!==speechRevision)return;
      if(traceRun&&diagram){
       const digest=await crypto.subtle.digest('SHA-256',await clip.arrayBuffer());
@@ -504,7 +518,7 @@ function say(text,preview=false){
      audioUrl=URL.createObjectURL(clip);calmVideo.src=audioUrl;
      idle.pause();idle.style.display='none';calmPortrait.style.display='none';calmVideo.style.display='block';
      calmVideo.ontimeupdate=()=>{if(diagram)diagram.guide.dataset.focus=calmVideo.currentTime<(starts[1]??Infinity)?'top':'bottom';};
-     calmVideo.onerror=handleError;calmVideo.onended=()=>{trace('audio','Видео проиграно до конца',{ms:Math.round(calmVideo.currentTime*1000)});finish();};
+     calmVideo.onerror=()=>{trace('audio','Ошибка декодирования видео '+(calmVideo.error?.code||0));handleError()};calmVideo.onended=()=>{trace('audio','Видео проиграно до конца',{ms:Math.round(calmVideo.currentTime*1000)});finish();};
      const pcm=new DataView(wav),sr=pcm.getUint32(24,true);
      let onset=0;
      for(let i=44;i+sr*.02*2<=wav.byteLength;i+=Math.round(sr*.02)*2){
@@ -525,6 +539,9 @@ function say(text,preview=false){
       const resume=document.querySelector('#resume-speech');resume.hidden=false;status.textContent='Нажми, чтобы услышать Анну.';
       resume.onclick=()=>{resume.hidden=true;if(revision===speechRevision)void play().catch(handleError);};}
      return;
+     }catch(e){if(revision!==speechRevision||controller.signal.aborted)return;
+      trace('audio','Видео недоступно: '+String(e.message).slice(0,90)+'; воспроизвожу готовый звук');
+      calmVideo.onerror=calmVideo.onended=null;calmVideo.pause();calmVideo.style.display='none';showIdle();}
     }
     if(audioUrl)URL.revokeObjectURL(audioUrl);
     const blob=new Blob([wav],{type:'audio/wav'});
@@ -647,7 +664,20 @@ async function enterAnna(){
  void openCamera();prepareRoomMic();display(greeting);
 }
 document.querySelector('#start-lesson').addEventListener('click',enterAnna);
+let confirmBoard=false;
 async function submitReply(text,source='text'){
+ const heard=text.toLowerCase().replaceAll('ё','е').replace(/[.,!?;:—–-]/g,' ').replace(/\s+/g,' ').trim();
+ const pair=/(?:^| )(?:2\s*[/⁄]\s*5|(?:две|два|2) (?:пятых|5 х))(?= |$)/.test(heard);
+ const writing=/(?:^| )(?:напиши|напишите|запиши|запишите|покажи|нарисуй|написать|записать|на пиши)(?= |$)/.test(heard);
+ const negative=/(?:^| )не (?:надо|пиши|нужно|хочу|показывай|рисуй)/.test(heard);
+ if(confirmBoard){confirmBoard=false;
+  if(!negative&&/^(?:да|ага|верно|точно|покажи)(?: |$)/.test(heard))return explainOnBoard('напиши две пятых');
+  if(/^(?:нет|не надо)(?: |$)/.test(heard))return 'Хорошо, не рисую. '+(stage==='welcome'?'Как у тебя настроение?':document.querySelector('#reply-label').textContent);
+ }
+ if(!negative&&pair&&writing&&!/(?: или | нет )/.test(' '+heard+' '))return explainOnBoard('напиши две пятых');
+ if(!negative&&((pair&&!writing&&stage!=='lesson')||(writing&&!pair&&/^(?:напиши|запиши|на пиши) (?:две|2) (?:пять|5)$/.test(heard)))){
+  confirmBoard=true;return 'Ты хочешь, чтобы я написала две пятых на доске?';
+ }
  if(stage==='lesson'||(['welcome','homework-check','homework-reason','review'].includes(stage)&&/(?:напиши|запиши|покажи|нарисуй|можешь (?:мне )?(?:написать|записать|показать|нарисовать)).*?(?:\d+\s*[/⁄]\s*\d+|(?:две|три|четыре)\s+(?:пятых|шестых|четвёртых|четвертых))/i.test(text))){
   const boardReply=explainOnBoard(text);
   if(boardReply!==null)return boardReply;
@@ -675,6 +705,8 @@ async function submitReply(text,source='text'){
     if(!why)return 'Понятно. Что помешало выполнить задание?';
    }else return 'Уточни, пожалуйста: ты успел сделать домашнее задание?';
   }
+  if(stage==='homework-reason'&&!/непонят|не понял|не понимаю|сложн|трудн|не получилось|не хотел|лень|не захотел|забыл|не успел|времен|болел|не знаю|пропуст|позже/.test(clean))
+   return 'Не совсем поняла. Что помешало сделать задание? Если хочешь что-то показать на доске, просто скажи.';
   const reply=/непонят|не понял|не понимаю|сложн|трудн|не получилось/.test(clean)
    ?'Давай начнём с простого примера, а к заданию можно будет вернуться после объяснения. '
    :/не хотел|лень|не захотел/.test(clean)
@@ -715,6 +747,8 @@ async function submitReply(text,source='text'){
  }
  if(await isWelcomeStop(text)){stage='ended';return tutor.end();}
  if(stage!=='welcome'||tutor.snapshot().done)return null;
+ if(!/(?:хорош|отлич|нормаль|замечат|прекрас|привет|радост|устал|груст|плохо|не очень|тяжело|настроени|так себе|как дела|как у тебя|а ты|супер)/i.test(text))
+  return 'Я не совсем поняла. Повтори, пожалуйста: как настроение или что показать на доске?';
  if(reviews[lessonNumber-1]){
   stage='homework-check';document.querySelector('#reply-label').textContent='Как прошло домашнее задание?';
   return /как у тебя|как дела|а ты/i.test(text)?'Спасибо, у меня всё хорошо. Удалось сделать домашнее задание?':/устал|грустно|плохо|не очень|тяжело/i.test(text)?'Давай без спешки. Получилось сделать домашнее задание?':'Хорошо. Как с домашним заданием, получилось его сделать?';
