@@ -87,7 +87,8 @@ h1,.workspace[data-active=true] h1{font-size:clamp(1.35rem,2.1vw,2rem);line-heig
  .answer-panel.low-space.editing #reply-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 }
 @media(min-width:520px) and (max-width:1024px){
- #board-answer.low-space.editing>.reading:has(#lesson-work:not([hidden])){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:4px 12px;align-items:start}
+ #board-answer.low-space.editing>.reading:has(#lesson-work:not([hidden])){display:grid;grid-template-columns:minmax(0,3fr) minmax(0,2fr);gap:4px 12px;align-items:start}
+ .workspace[data-active=true] #board-answer.low-space.editing .question[data-short=true]{font-size:1rem;line-height:1.2}
  #board-answer.low-space.editing #board-explanation{grid-column:1/-1}
  #board-answer.low-space.editing #lesson-work .board{display:flex;flex-direction:column;gap:4px;margin:0;padding:4px 8px}
  #board-answer.low-space.editing #tape{order:-1;flex:none;height:24px}
