@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="ru"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,interactive-widget=resizes-content">
 <title>Что означает дробь — Flamingo</title>
 <script>if(location.protocol==='file:')location.replace('https://flamingo.plus/sedum/anna/')</script>
 <style>
@@ -70,6 +70,29 @@ h1,.workspace[data-active=true] h1{font-size:clamp(1.35rem,2.1vw,2rem);line-heig
 @media(max-width:680px){main{gap:10px}.workspace,.materials{padding:16px}.control-dock{position:static}.control-dock .audio{align-items:center}.control-dock #audio-settings{line-height:1.25}.voice-state{padding:0}.top{padding-block:3px}.views button{padding-inline:12px}.workspace[data-active=true] .question[data-short=true]{margin:14px 0}.teacher .bio{padding-bottom:0}}
 </style>
 <div id="pilot-room">
+<style>
+@media(max-width:1024px),(pointer:coarse){
+ .control-dock{position:static}
+ .answer-panel.editing{display:flex;flex-direction:column;max-height:calc(var(--usable-height,100dvh) - 12px);min-height:0}
+ .answer-panel.editing>.reading{min-height:0;overflow:auto;scrollbar-gutter:auto}
+ .answer-panel.editing #text-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 8px;align-items:end;flex:none;margin:0;padding:6px 0;background:var(--room-paper)}
+ .answer-panel.editing #reply-label{grid-column:1/-1;width:auto;font-size:.875rem}
+ .answer-panel.editing #reply{width:100%;font-size:16px;min-height:44px}
+ .answer-panel.editing .question{margin:4px 0 8px;font-size:1.0625rem;line-height:1.35}
+ .answer-panel.editing .board{margin:4px 0;padding:8px}.answer-panel.editing .board p{margin-bottom:4px}
+ .answer-panel.editing .tape{height:28px}
+ #board-answer.editing .intro{display:none}
+ .workspace[data-active=true] #board-answer.editing .question[data-short=true]{font-size:1.0625rem;line-height:1.3;margin:2px 0 6px}
+ #board-answer.editing .board p{font-size:1rem;line-height:1.35}
+ .answer-panel.low-space.editing #reply-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+}
+@media(min-width:520px) and (max-width:1024px){
+ #board-answer.low-space.editing>.reading:has(#lesson-work:not([hidden])){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:4px 12px;align-items:start}
+ #board-answer.low-space.editing #board-explanation{grid-column:1/-1}
+ #board-answer.low-space.editing #lesson-work .board{display:flex;flex-direction:column;gap:4px;margin:0;padding:4px 8px}
+ #board-answer.low-space.editing #tape{order:-1;flex:none;height:24px}
+}
+</style>
 <header><div class="top"><span class="brand">flamingo.</span><span class="subject">Математика</span><button id="end" type="button">Закончить урок</button></div></header>
 <main><div class="room-toolbar"><nav class="views" aria-label="Вид занятия">
  <button type="button" data-view="board" aria-pressed="true">Доска</button>
@@ -82,7 +105,7 @@ h1,.workspace[data-active=true] h1{font-size:clamp(1.35rem,2.1vw,2rem);line-heig
  <p role="status" id="pilot-state"></p>
  <a id="pilot-login" href="/вход?from=anna" hidden>Войти и вернуться к уроку</a>
 </div>
-<div id="board-question"><p id="current-question" class="question" aria-live="polite"></p></div>
+<div class="answer-panel" id="board-answer"><div class="reading"><div id="board-question"><p id="current-question" class="question" aria-live="polite"></p></div>
 <div id="lesson-work" hidden>
 <p class="intro">Если разделить целое на две равные части, одна такая часть — половина, или 1/2.</p>
 <div class="board"><p id="task"></p><div class="tape" id="tape" aria-hidden="true"></div></div>
@@ -92,6 +115,7 @@ h1,.workspace[data-active=true] h1{font-size:clamp(1.35rem,2.1vw,2rem);line-heig
  <div id="board-explanation-drawing" style="margin-block:12px"></div>
  <button id="close-board-explanation" type="button">Скрыть рисунок</button>
 </figure>
+</div></div>
 <p id="homework-tools" hidden><button id="show-review" type="button">Показать разбор примера</button> <button id="continue-lesson" type="button">Перейти к теме</button></p>
 <button id="restart" type="button" hidden>Начать заново</button>
 <p id="assigned-homework" hidden></p>
@@ -148,8 +172,12 @@ placeSettings();compactControls.addEventListener('change',placeSettings);
 function showView(view){
  if(!room)return;
  room.dataset.view=view;workspace.hidden=view!=='board';materials.hidden=view!=='materials';
- const slot=document.querySelector(view==='board'?'#board-question':'.main-question-alt');
+ const alt=document.querySelector('.main-question-alt');
+ if(view!=='board'&&!alt.querySelector('.reading')){const reading=document.createElement('div');reading.className='reading';alt.prepend(reading);}
+ const slot=view==='board'?document.querySelector('#board-question'):alt.querySelector('.reading');
  if(currentQuestion.parentElement!==slot)slot.append(currentQuestion);
+ positionAnswer();
+ if(view==='board')alt.querySelector('.reading')?.remove();
  for(const button of viewButtons)button.setAttribute('aria-pressed',String(button.dataset.view===view));
 }
 for(const button of viewButtons)button.addEventListener('click',()=>showView(button.dataset.view));
@@ -160,12 +188,38 @@ function selectMaterial(source){
 methodTab?.addEventListener('click',()=>selectMaterial(false));
 sourcesTab?.addEventListener('click',()=>selectMaterial(true));
 const textToggle=document.querySelector('#text-toggle');
+const mobileAnswer=matchMedia('(max-width:1024px),(pointer:coarse)'),boardAnswer=document.querySelector('#board-answer');
+const dockSlot=document.createComment('composer');form.before(dockSlot);
+const altPanel=document.querySelector('.main-question-alt');altPanel.classList.add('answer-panel');
+let layoutFrame=0;
+function positionAnswer(){
+ const editing=mobileAnswer.matches&&!form.hidden&&!form.querySelector('input').disabled;
+ const panel=room.dataset.view==='board'?boardAnswer:altPanel;
+ for(const p of [boardAnswer,altPanel])p.classList.toggle('editing',editing&&p===panel);
+ if(editing){if(form.parentElement!==panel)panel.append(form);}
+ else if(form.parentNode!==dockSlot.parentNode)dockSlot.after(form);
+}
+function fitAnswer(){
+ const vv=window.visualViewport;
+ const available=vv?.height??innerHeight;
+ document.documentElement.style.setProperty('--usable-height',available+'px');
+ for(const panel of [boardAnswer,altPanel])panel.classList.toggle('low-space',available<=340);
+ if(document.activeElement!==reply||!form.parentElement.classList.contains('editing'))return;
+ const r=form.parentElement.getBoundingClientRect(),top=(vv?.offsetTop??0)+6,bottom=top+(vv?.height??innerHeight)-12;
+ if(r.bottom>bottom+1)window.scrollBy(0,r.bottom-bottom);
+ else if(r.top<top-1)window.scrollBy(0,r.top-top);
+}
+function scheduleFit(){cancelAnimationFrame(layoutFrame);layoutFrame=requestAnimationFrame(fitAnswer);}
+mobileAnswer.addEventListener('change',()=>{positionAnswer();scheduleFit()});
+window.visualViewport?.addEventListener('resize',scheduleFit);window.addEventListener('resize',scheduleFit);
+reply.addEventListener('focus',scheduleFit);
 textToggle?.addEventListener('click',()=>{
  form.hidden=!form.hidden;
  textToggle.setAttribute('aria-expanded',String(!form.hidden));
  textToggle.textContent=form.hidden?'Ответить текстом':'Скрыть текстовый ввод';
+ positionAnswer();
  paintLessonLine();
- if(!form.hidden)reply.focus();
+ if(!form.hidden){reply.focus();scheduleFit();}
 });
 const cameraButton=document.querySelector('#camera-toggle'),camera=document.querySelector('#pupil-video');
 const cameraNote=document.querySelector('#camera-note'),cameraOff=document.querySelector('#pupil-off');
@@ -703,16 +757,17 @@ function say(text,preview=false){
 }
 sample?.addEventListener('click',()=>{if(!recognition&&!tutor.snapshot().done)say('Две пятых. Полоску разделили на пять равных частей. Две из них закрасили. Я не расслышала ответ. Повтори, пожалуйста.',true);});
 function add(text){if(localTest)trace('dialogue',text);const line=document.createElement('li');line.textContent=text;if(text.startsWith('Ученик'))line.setAttribute?.('data-student','');output.append(line);output.scrollTop=output.scrollHeight;}
-function lockAnswer(locked){reply.disabled=locked;form.querySelector('button').disabled=locked;}
+function lockAnswer(locked){reply.disabled=locked;form.querySelector('button').disabled=locked;positionAnswer();}
 function paintLessonLine(){
  if(!currentQuestion)return;
  document.querySelector('#lesson-phase').textContent=tutor.snapshot().done?'Итог урока':stage==='lesson'?(tutor.example().number===1?'Разбираем вместе':'Самостоятельный пример'):stage==='welcome'?'Приветствие':stage==='setup'?'Подключение':'Домашнее задание';
  const active=stage==='lesson'&&!tutor.snapshot().done;
- const short=active&&form.hidden;
+ const short=active&&(form.hidden||mobileAnswer.matches&&room.dataset.view==='board'&&lastSpeech.includes('?'));
  if(workspace)workspace.dataset.active=String(active);
  currentQuestion.dataset.short=String(short);
  const trailingQuestion=lastSpeech.match(/(?:^|[.!?]\s+)([^.!?]+\?)\s*$/)?.[1]?.trim();
  currentQuestion.textContent=short?(trailingQuestion||tutor.resumeQuestion?.()||'') : lastSpeech;
+ if(boardAnswer.classList.contains('editing')){boardAnswer.querySelector('.reading').scrollTop=0;scheduleFit();}
 }
 function display(text){if(text===null)return;const state=tutor.snapshot();const task=state.done&&state.notes.length>=2&&stage==='lesson'?homework[lessonNumber-1]:null;if(task&&homeworkPanel.hidden){homeworkPanel.textContent='Домашнее задание. '+task;homeworkPanel.hidden=false;text+=' '+homeworkPanel.textContent;}lastSpeech=text;add('Учитель: '+text);paintLessonLine();board();if(state.done){closeCamera();disableAuto();lockAnswer(true);end.disabled=true;showView('board');if(restart)restart.hidden=false;if(nextLesson){nextLesson.hidden=lessonNumber>=3||state.notes.length<2||!state.notes.at(-1)?.independent;nextLesson.textContent=lessonNumber===1?'Дальше: равные и неравные части':'Дальше: эквивалентные дроби';}}updateMic();say(text);}
 if(entry){lockAnswer(true);updateMic();}else display(tutor.opening);
