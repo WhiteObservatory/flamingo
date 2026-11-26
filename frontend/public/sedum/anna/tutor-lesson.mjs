@@ -52,6 +52,14 @@ export async function voiceTurn(tutor,result){
  /^(?:один|одна|два|две|три|четыре|пять|шесть|\d+)(?:\s*(?:\/|из))?\s*[.!…]*$/i.test(result.transcript.trim()))
   return {teacher:repeatSpeech};
  const student=recognized;
+ if(tutor.expectsFraction?.()&&ex?.d){
+  // Only for ASR in a share-of-a-whole question. Never rewrite typed arithmetic.
+  const pair=student.match(/^(\d+)[-/](\d+)[.!?,; ]+ой[,.!\s]+нет[,.!\s]+(\d+)-(\d+)[.!]?$/iu);
+  if(pair&&+pair[2]===ex.d&&+pair[4]===ex.d&&+pair[1]<=ex.d&&+pair[3]<=ex.d)
+   return {student,teacher:await tutor.send(pair[3]+'/'+pair[4])};
+  if(/\d\s*[-−–]\s*\d|минус|вычесть|вычитание/iu.test(student)&&!fraction(selfCorrection(student)))
+   return {student,teacher:'Ты называешь дробь или вычитаешь? Если дробь, скажи, например, «одна треть».'};
+ }
  return {student,teacher:await tutor.send(student)};
 }
 const items=[
@@ -119,7 +127,7 @@ function forgotten(raw){
 }
 function explainParts(n,d){return `Давай вспомним. Нижнее число, ${d}, показывает, на сколько равных частей разделили целое. Верхнее число, ${n}, показывает, сколько частей закрасили.`;}
 function selfCorrection(raw){
- const parts=raw.split(/(?:[,.!?;—–]\s*|\s+)(?:ой[,\s]+нет|нет[,\s]+(?:вернее|это|правильнее|все-таки)|я поправлюсь|поправлюсь|точнее|вернее)[,:—–\s]+/i);
+ const parts=raw.split(/(?:[,.!?;—–]\s*|\s+)(?:ой[,\s]+нет|нет[,\s]+(?:вернее|это|правильнее|все-таки)|я поправлюсь|поправлюсь|точнее|вернее)[.,!:—–\s]+/i);
  if(parts.length<2)return raw;
  const final=parts.at(-1).trim();
  return fraction(final)||combined(final)?final:raw;
@@ -154,7 +162,7 @@ export function firstLesson(){
   return 'Теперь новый пример — попробуй самостоятельно. '+items[index].title+' Какая доля закрашена?';
  }
  return {opening:items[0].title+' Какая доля закрашена?',snapshot,end,
-  markHelp:()=>{assisted=true;},example:()=>({...items[index],number:index+1}),
+  expectsFraction:()=>phase==='answer',markHelp:()=>{assisted=true;},example:()=>({...items[index],number:index+1}),
   resumeQuestion:()=>phase==='reason'?why:items[index].title+' Какая доля закрашена?',async send(raw){
   if(done)return labels.ended;
   const decision=await guard.send(raw);

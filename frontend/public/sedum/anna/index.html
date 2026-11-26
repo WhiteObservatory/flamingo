@@ -581,13 +581,19 @@ function say(text,preview=false){
   const handleError=()=>{if(revision===speechRevision){trace('audio','Сбой озвучки');status.textContent='Не удалось озвучить реплику. Текст доступен в диалоге.';finish();}};
   const cues=diagram?diagram.parts.map(spokenMath):[lineText];
   const playReply=async ()=>{
-    const preset=demo.value!=='kseniya-ref'?null:diagram?.twoFifths?'two-fifths-v2.mp4':
+    const confirmation=!diagram&&lineText==='Да, дробь верная. Что означают верхнее и нижнее числа в этой записи?';
+    const preset=demo.value!=='kseniya-ref'?null:confirmation?'fraction-confirm-kseniya.mp4':diagram?.twoFifths?'two-fifths-v2.mp4':
       lineText==='Поняла. Сейчас начнём урок, а к заданию сможешь вернуться после него. А теперь тема урока: Что означает дробь. Если что-то непонятно, спрашивай. Полоску разделили на пять равных частей. Две закрасили. Какая доля закрашена?'?'intro-fractions-v2.mp4':null;
     if(preset){
      calmVideo.src='./'+preset;idle.pause();idle.style.display='none';calmPortrait.style.display='none';calmVideo.style.display='block';
      calmVideo.ontimeupdate=()=>{if(diagram)diagram.guide.dataset.focus=calmVideo.currentTime<5.52?'top':'bottom'};
      calmVideo.onended=()=>{trace('audio','Видео проиграно до конца: '+preset,{ms:Math.round(calmVideo.currentTime*1000)});finish()};
-     const play=async()=>{await calmVideo.play();if(revision===speechRevision){status.textContent='';trace('audio','Начато воспроизведение: '+preset,measuredEnd===null?{}:{ms:Math.round(performance.now()-measuredEnd)})}};
+     const play=async()=>{await calmVideo.play();if(revision===speechRevision){status.textContent='';trace('audio','Начато воспроизведение: '+preset,measuredEnd===null?{}:{ms:Math.round(performance.now()-measuredEnd)});
+      if(confirmation&&measuredEnd!==null){const mark=()=>{if(revision!==speechRevision||calmVideo.ended)return;
+       if(calmVideo.currentTime<.24||calmVideo.paused){requestAnimationFrame(mark);return;}
+       const ms=Math.round(performance.now()-measuredEnd-1000*(calmVideo.currentTime-.24)/calmVideo.playbackRate);
+       trace('audio','Первый звук ответа',{ms});latencyLine.hidden=false;latencyLine.textContent='Последний голосовой ход: '+(ms/1000).toFixed(2)+' с до первых слов Анны.';};requestAnimationFrame(mark);}
+     }};
      try{await play();return}catch(e){
       if(revision!==speechRevision)return;
       if(e.name==='NotAllowedError'){const resume=document.querySelector('#resume-speech');resume.hidden=false;status.textContent='Нажми, чтобы услышать Анну.';resume.onclick=()=>{resume.hidden=true;if(revision===speechRevision)play().catch(handleError)};return}
@@ -921,7 +927,7 @@ function encodeInput(samples,rate){
  return wav.buffer;
 }
 async function showVoiceTurn(result,measuredEnd=null){
- const turn=await voiceTurn({snapshot:tutor.snapshot,example:stage==='lesson'?tutor.example:undefined,send:text=>submitReply(text,'voice')},result);
+ const turn=await voiceTurn({snapshot:tutor.snapshot,example:stage==='lesson'?tutor.example:undefined,expectsFraction:()=>stage==='lesson'&&!!tutor.expectsFraction?.(),send:text=>submitReply(text,'voice')},result);
  if(!turn)return;
  if(turn.student)add('Ученик (голос): '+turn.student);
  voiceEndAt=measuredEnd;display(turn.teacher);voiceEndAt=null;
