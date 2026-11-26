@@ -80,6 +80,8 @@ function evidence(text,n,d){
  const match=s.match(new RegExp('^'+count+' (?:част[ьи] |частей )?закрашен[оыа]? '+count+' (?:равных )?(?:частей |части )?всего\\s*$'));
  const reverse=s.match(new RegExp('^всего '+count+' (?:равных )?(?:частей |части )?закрашен[оыа]? '+count+'(?: (?:частей|части|часть))?\\s*$'));
  const read=x=>symbols[x]??Number(x);
+ const child=s.trim().match(new RegExp('^'+count+' [—–-]?\\s*(?:это )?все равные (?:кусочки|части|частички) а '+count+' мы (?:закрасили|раскрасили)$'));
+ if(child)return read(child[1])===d&&read(child[2])===n;
  if((match&&read(match[1])===n&&read(match[2])===d)||(reverse&&read(reverse[2])===n&&read(reverse[1])===d))return true;
  const qty='(\\d+|одна|один|две|два|три|четыре|пять|шесть|двух|трех|четырех|пяти|шести)';
  const fromWhole=s.match(new RegExp('^из '+qty+' равных (?:частей|отрезков) (?:закрашен[оыа]?|закрасили) '+qty+'(?: (?:часть|части|частей|отрезок))?\\s*$'));
@@ -152,17 +154,22 @@ export function firstLesson(){
   return 'Теперь новый пример — попробуй самостоятельно. '+items[index].title+' Какая доля закрашена?';
  }
  return {opening:items[0].title+' Какая доля закрашена?',snapshot,end,
-  example:()=>({...items[index],number:index+1}),
+  markHelp:()=>{assisted=true;},example:()=>({...items[index],number:index+1}),
   resumeQuestion:()=>phase==='reason'?why:items[index].title+' Какая доля закрашена?',async send(raw){
   if(done)return labels.ended;
   const decision=await guard.send(raw);
   if(decision===labels.stop){done=true;return decision;}
-  if(decision===labels.offer||decision===labels.declined)return decision;
+  if(decision===labels.offer)return decision;
+  if(decision===labels.declined)return decision+' '+this.resumeQuestion();
   if(decision!==labels.wait){
    assisted=true;
-   return decision+' '+advance(false,false);
+   phase='reason';return decision+' '+why;
   }
   const {n,d}=items[index];
+  if(/(?:размер|равенство|величина).{0,32}(?:безразлич|неваж|не важ|не имеет значения)|(?:неважно|не важно).{0,24}(?:равны|одинаков)/i.test(raw)){
+   assisted=true;return 'Размер важен: считать части можно, когда они равные. Что показывают оба числа именно на этой полоске?';
+  }
+  if(forgotten(raw)){assisted=true;phase='reason';return explainParts(n,d)+' '+why;}
   const questionHelp=mathQuestion(raw);
   if(questionHelp){
    guard.dismissOffer();assisted=true;
@@ -238,7 +245,7 @@ export function secondLesson(){
  }
  return {
   opening:equalTrack[0].title+' '+question(),
-  resumeQuestion:()=>phase==='reason'?(index===0?'Почему здесь нельзя просто посчитать части?':'Почему здесь можно определить долю по числу частей?'):question(),
+  markHelp:()=>{help=true;},resumeQuestion:()=>phase==='reason'?(index===0?'Почему здесь нельзя просто посчитать части?':'Почему здесь можно определить долю по числу частей?'):question(),
   example:()=>({...equalTrack[index],number:index+1}),
   snapshot:()=>({done,notes:notes.map(x=>({...x}))}),
   end(){done=true;return guard.end();},
@@ -246,8 +253,9 @@ export function secondLesson(){
    if(done)return labels.ended;
    const signal=await guard.send(raw);
    if(signal===labels.stop){done=true;return signal;}
-   if(signal===labels.offer||signal===labels.declined)return signal;
-   if(signal!==labels.wait){help=true;return explain()+' '+finish(false,false);}
+   if(signal===labels.offer)return signal;
+   if(signal===labels.declined)return signal+' '+this.resumeQuestion();
+   if(signal!==labels.wait||forgotten(raw)){help=true;phase='reason';return explain()+' '+this.resumeQuestion();}
    const text=normalize(raw), no=negative.test(text), unequal=unequalParts.test(text);
    const answer=fraction(raw)??combined(raw)?.answer;
    const correctFraction=answer&&answer[0]>0&&answer[1]===3*answer[0];
@@ -255,7 +263,6 @@ export function secondLesson(){
    const equalReason=!unequal&&/равн|одинаков/.test(reasoning)&&(evidence(reasoning,1,3)||
     /^один из (?:трех|3) равных (?:отрезков|частей) закрашен[.!]?$/i.test(normalize(reasoning)));
    if(no||answer||uncertainty(raw)||equalReason)guard.dismissOffer();
-   if(forgotten(raw)){help=true;return 'Давай разберём вместе. '+explain()+' '+finish(phase==='reason',false);}
    const claimsThird=/^(?:да|можно|это треть|это одна треть)(?:[\s,.!]|$)/i.test(text)||!!answer;
    if(index===0&&!claimsThird&&(no||phase==='reason'||/нельзя|недостаточно/.test(text))&&unequal)
     return 'Верно: число частей не показывает их длину. '+finish(true,true);
@@ -302,7 +309,7 @@ export function thirdLesson(){
   return 'Теперь попробуй самостоятельно. '+opening();
  }
  return {
-  opening:opening(),example:()=>({...equivalentTrack[index],number:index+1}),
+  markHelp:()=>{help=true;},opening:opening(),example:()=>({...equivalentTrack[index],number:index+1}),
   resumeQuestion:()=>phase==='reason'?'Почему эти дроби обозначают одну и ту же долю?':question(),
   snapshot:()=>({done,notes:notes.map(x=>({...x}))}),
   end(){done=true;return guard.end();},
@@ -310,8 +317,9 @@ export function thirdLesson(){
    if(done)return labels.ended;
    const signal=await guard.send(raw);
    if(signal===labels.stop){done=true;return signal;}
-   if(signal===labels.offer||signal===labels.declined)return signal;
-   if(signal!==labels.wait){help=true;return explain()+' '+advance(false,false);}
+   if(signal===labels.offer)return signal;
+   if(signal===labels.declined)return signal+' '+this.resumeQuestion();
+   if(signal!==labels.wait||forgotten(raw)){help=true;phase='reason';return explain()+' '+askWhy;}
    const text=normalize(raw).replace(/[.!?]+$/,'');
    const same=/^(?:да|одинаковую|одинаковые|одна и та же доля|равны|это одно и то же)(?:$|[,;])/.test(text);
    const different=/^(?:нет|разную|разные|не равны)(?:$|[,;])/.test(text);
@@ -320,9 +328,9 @@ export function thirdLesson(){
    const reasoning=text.replace(/^(?:да|одинаковую|равны)[,;]\s*/,'');
    const {d,base}=equivalentTrack[index];
    const dividesBoth=new RegExp('^(?:если )?разделить (?:верхнее и нижнее числа|оба числа|числитель и знаменатель) на (?:два|2), из 2/'+d+' получится '+base+'$');
-   const understood=!different&&(reason.test(reasoning)||dividesBoth.test(reasoning));
+   const paired=new RegExp('^(?:мы )?объединили '+(index===0?'(?:четыре|4)':'(?:шесть|6)')+' равных (?:кусочка|части|частей|кусочков) попарно[:,] получились '+group+' одинаковые группы,? и закрашена (?:ровно )?одна$');
+   const understood=!different&&(reason.test(reasoning)||paired.test(reasoning)||dividesBoth.test(reasoning));
    if(same||different||understood||uncertainty(raw))guard.dismissOffer();
-   if(forgotten(raw)){help=true;return 'Давай разберём вместе. '+explain()+' '+advance(phase==='reason',false);}
    if(understood)return 'Верно: изменилось деление на части, а закрашенная доля не изменилась. '+advance(true,true);
    if(same){phase='reason';return 'Да, доля одна и та же. '+askWhy;}
    if(!help){

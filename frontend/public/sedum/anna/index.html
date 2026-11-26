@@ -36,21 +36,53 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
 @media(max-width:680px){.room{grid-template-columns:minmax(0,1fr);gap:12px}.teacher:not([hidden]){display:grid;grid-template-columns:minmax(0,1fr) minmax(0,.65fr);gap:10px}.teacher>h2{grid-column:1/-1;margin:0}.pupil{margin:0}.teacher .portrait,.teacher .pupil-video{max-height:150px}.top{gap:10px}.brand{white-space:nowrap;flex:none}.subject{padding-left:10px}.top #end{padding:6px 9px}.control-dock{padding:8px}.control-dock .audio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.control-dock .audio>button{font-size:.8rem;line-height:1.2;padding:6px;min-height:44px}.voice-state{grid-row:2;grid-column:1/3;font-size:.8rem;padding:6px}.control-dock #audio-settings{grid-row:2;grid-column:3;margin-left:0;font-size:.8rem}.control-dock #audio-settings[open]{grid-row:3;grid-column:1/-1;max-height:38dvh;overflow:auto}.control-dock #audio-settings summary{line-height:1.2}.control-dock .audio:has(#audio-settings[open]) .voice-state{grid-column:1/-1}}
 @media(max-width:440px){.subject{display:none}}
 @media(max-width:680px){.teacher .portrait,.teacher .pupil-video{max-height:118px}.workspace .surface{margin-bottom:8px}.workspace[data-active=true] .question[data-short=true]{margin:12px 0 16px}.workspace .board{margin:12px 0 4px}}
+@media(orientation:landscape) and (max-height:500px){.control-dock{position:static;padding:6px 12px}.control-dock .audio{gap:4px}.control-dock form{margin-top:4px}}
+</style>
+<style>
+/* Student room: the shared Flamingo room palette, distinct from landing-page blue. */
+@font-face{font-family:'Manrope Variable';src:url('../assets/manrope-cyrillic.woff2') format('woff2');font-weight:200 800;font-display:swap;unicode-range:U+0400-052F}
+@font-face{font-family:'Manrope Variable';src:url('../assets/manrope-latin.woff2') format('woff2');font-weight:200 800;font-display:swap;unicode-range:U+0000-00FF,U+2000-206F}
+:root{--room-canvas:#f1f1ef;--room-paper:#f7f7f5;--line:#d9d9d6;--room-go:#3d6412;--room-go-solid:#4a7a16;--room-go-soft:#eef4e2;--room-tab:#e9e9e6;--room-focus:#1f5480}
+body{font-family:'Manrope Variable',system-ui,sans-serif;font-size:1.0625rem}.brand{font-weight:600}.room #output{font-size:1.0625rem}
+.room-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap}.room-toolbar .voice-state{font-size:.875rem}
+.main-question-alt:empty{display:none}
+.room-toolbar #audio-settings{margin-inline-start:auto;max-width:100%;font-size:.875rem}.room-toolbar #audio-settings[open]{flex-basis:100%;background:var(--room-paper);padding:10px 14px;border-radius:14px}.room-toolbar #audio-settings select{max-width:100%}.room-toolbar #audio-settings summary{min-height:44px;align-content:center}
+@media(max-width:680px){.room-toolbar nav{flex-basis:100%;width:fit-content;flex-grow:0}.room-toolbar{row-gap:0}.room-toolbar .voice-state{flex:1;min-width:0}}
+body{background:var(--room-canvas)}#pilot-room{display:flex;flex-direction:column;min-height:100dvh}
+header{background:var(--room-paper)}.top,main,.control-dock{width:min(100%,1440px);margin-inline:auto}
+.top{padding:7px clamp(14px,3vw,40px);gap:18px}.subject{color:var(--muted);padding-left:18px}
+.top #end{background:transparent;border-color:transparent}.top #end:hover{background:var(--room-tab)}
+main{padding:clamp(12px,2vw,28px);gap:14px}.views,.material-nav{align-self:flex-start;border-radius:12px;padding:3px;background:var(--room-tab);gap:2px;margin:0}
+.views button,.material-nav button{background:transparent;border-color:transparent;font-weight:500;min-height:44px}
+.views button[aria-pressed=true],.material-nav button[aria-pressed=true]{color:var(--ink);background:var(--room-paper);border-color:var(--line);font-weight:650}
+.workspace,.materials,.teacher{border-radius:14px;background-color:var(--room-paper)}
+.workspace{background-image:none}.surface{display:flex;align-items:center;gap:8px;font-size:.875rem;margin:0 0 12px;color:var(--room-go)}.surface:before{content:'';width:8px;height:8px;border-radius:50%;background:currentColor}
+h1,.workspace[data-active=true] h1{font-size:clamp(1.35rem,2.1vw,2rem);line-height:1.2;font-weight:600;letter-spacing:-.03em}
+.workspace[data-active=true] .question[data-short=true]{font-size:clamp(1.4rem,2.4vw,2.1rem);margin:24px 0 16px;line-height:1.2;max-width:38ch}
+.board{background:var(--room-canvas);border:0}.board p{font-weight:500}.teacher h2,.materials h2{font-size:1.1rem}.teacher{align-self:start}
+.pupil{background:var(--room-canvas)}.primary,#next-lesson{background:var(--room-go-solid);border-color:var(--room-go-solid);color:white}button,#reply{border-radius:10px}
+#text-toggle{background:var(--room-paper);color:var(--ink);border-color:var(--line)}#text-toggle[aria-expanded=true]{background:var(--room-tab)}
+#handsfree[aria-pressed=true]{background:var(--room-go-soft);color:var(--room-go);border-color:transparent}.voice-state{background:transparent;color:var(--muted);font-weight:500}
+:is(button,summary,input,select,a):focus-visible{outline:2px solid var(--room-focus);outline-offset:2px}
+.control-dock{width:min(calc(100% - 24px),1384px);margin:0 auto 12px;box-shadow:none}.control-dock summary,#transcript summary{min-height:44px;display:list-item;align-content:center}
+.main-question-alt:not(:empty){border-radius:14px;background:var(--room-paper);border:1px solid var(--line);padding:12px 18px}.main-question-alt .question{margin:0}
+.materials article{margin-top:18px}.teacher-note{overflow-wrap:anywhere}
+@media(max-width:680px){main{gap:10px}.workspace,.materials{padding:16px}.control-dock{position:static}.control-dock .audio{align-items:center}.control-dock #audio-settings{line-height:1.25}.voice-state{padding:0}.top{padding-block:3px}.views button{padding-inline:12px}.workspace[data-active=true] .question[data-short=true]{margin:14px 0}.teacher .bio{padding-bottom:0}}
 </style>
 <div id="pilot-room">
 <header><div class="top"><span class="brand">flamingo.</span><span class="subject">Математика</span><button id="end" type="button">Закончить урок</button></div></header>
-<main><nav class="views" aria-label="Вид занятия">
+<main><div class="room-toolbar"><nav class="views" aria-label="Вид занятия">
  <button type="button" data-view="board" aria-pressed="true">Доска</button>
  <button type="button" data-view="class" aria-pressed="false">Класс</button>
  <button type="button" data-view="materials" aria-pressed="false">Материалы</button>
-</nav><div class="room" data-view="board"><section class="workspace" aria-labelledby="title"><div class="surface">Доска занятия</div><h1 id="title">Что означает дробь</h1>
+</nav><span id="voice-state" class="voice-state" role="status">Микрофон выключен</span></div><div class="main-question-alt"></div><div class="room" data-view="board"><section class="workspace" aria-labelledby="title"><div class="surface" id="lesson-phase">Подключение</div><h1 id="title">Что означает дробь</h1>
 <div id="lesson-entry">
  <p>Привет! Сегодня разберёмся, что означает дробь.</p>
  <button type="button" class="primary" id="start-lesson" hidden>Повторить подключение</button>
  <p role="status" id="pilot-state"></p>
  <a id="pilot-login" href="/вход?from=anna" hidden>Войти и вернуться к уроку</a>
 </div>
-<p id="current-question" class="question" aria-live="polite"></p>
+<div id="board-question"><p id="current-question" class="question" aria-live="polite"></p></div>
 <div id="lesson-work" hidden>
 <p class="intro">Если разделить целое на две равные части, одна такая часть — половина, или 1/2.</p>
 <div class="board"><p id="task"></p><div class="tape" id="tape" aria-hidden="true"></div></div>
@@ -81,7 +113,6 @@ summary{cursor:pointer;color:#20558a;min-height:34px;padding:5px 0;font-weight:5
 </div></main>
 <footer class="control-dock" inert><div class="audio"><button id="mic" type="button" hidden>Ответить голосом</button>
 <button id="handsfree" type="button" aria-pressed="false" aria-label="Включить голосовой разговор">Микрофон</button>
-<span id="voice-state" class="voice-state" role="status">Микрофон выключен</span>
 <button id="camera-toggle" type="button" aria-pressed="false">Включить камеру</button>
 <button id="text-toggle" class="primary" type="button" aria-expanded="false" aria-controls="text-form">Ответить текстом</button>
 <details id="audio-settings"><summary>Настройки звука</summary>
@@ -111,9 +142,14 @@ const currentQuestion=document.querySelector('#current-question'),voiceState=doc
 const room=document.querySelector('.room'),viewButtons=document.querySelectorAll?.('.views [data-view]')??[];
 const workspace=document.querySelector('.workspace'),materials=document.querySelector('.materials');
 const methodTab=document.querySelector('#method-tab'),sourcesTab=document.querySelector('#sources-tab');
+const compactControls=matchMedia('(max-width:680px)'),settingsPanel=document.querySelector('#audio-settings');
+function placeSettings(){const parent=document.querySelector(compactControls.matches?'.room-toolbar':'.control-dock .audio');if(settingsPanel.parentNode!==parent)parent.append(settingsPanel);}
+placeSettings();compactControls.addEventListener('change',placeSettings);
 function showView(view){
  if(!room)return;
  room.dataset.view=view;workspace.hidden=view!=='board';materials.hidden=view!=='materials';
+ const slot=document.querySelector(view==='board'?'#board-question':'.main-question-alt');
+ if(currentQuestion.parentElement!==slot)slot.append(currentQuestion);
  for(const button of viewButtons)button.setAttribute('aria-pressed',String(button.dataset.view===view));
 }
 for(const button of viewButtons)button.addEventListener('click',()=>showView(button.dataset.view));
@@ -191,13 +227,14 @@ async function openComputerMic(){
    inputDevice.replaceChildren(new Option('Автовыбор · предпочитать микрофон компьютера',''),...found.map((d,i)=>new Option(d.label||'Микрофон '+(i+1),d.deviceId)));
    if(selected&&found.some(d=>d.deviceId===selected))inputDevice.value=selected;
   }
-  if(!selected&&isPhone(label))throw new Error('phone-mic');
+  if(!selected&&isPhone(label)&&!(/Android|iPhone|iPad|Mobile/i.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))throw new Error('phone-mic');
   if(activeDevice)activeDevice.textContent=label?'Активный вход: '+label:'';
   return current;
  }catch(err){current.getTracks().forEach(t=>t.stop());if(activeDevice)activeDevice.textContent='';throw err;}
 }
 let roomMic=null,roomMicPending=null,micVersion=0;
 function closeRoomMic(){
+ cancelInterruption?.();
  micVersion++;roomMicPending=null;roomMic?.getTracks().forEach(t=>t.stop());roomMic=null;
 }
 function acquireRoomMic(){
@@ -238,6 +275,47 @@ function trace(kind,text='',extra={}){
  }).catch(()=>{if(status)status.textContent='Тестовый журнал недоступен.';});
 }
 let voiceEndAt=null;
+let cancelInterruption=null;
+const localTest=['localhost','127.0.0.1'].includes(location.hostname);
+// Pause on the pupil's voice, then classify the short utterance.
+async function watchInterruption(revision){
+ if(!autoTalk||!navigator.mediaDevices)return;
+ let ctx,dead=false,paused=null,busy=false;
+ const req=new AbortController();
+ const close=()=>{dead=true;req.abort();if(ctx&&ctx.state!=='closed')void ctx.close().catch(()=>{});if(cancelInterruption===close)cancelInterruption=null;};
+ cancelInterruption=close;
+ try{
+  const stream=await acquireRoomMic();if(dead)return;
+  ctx=new AudioContext();await ctx.audioWorklet.addModule('./mic-capture.mjs');if(dead)return;
+  const node=new AudioWorkletNode(ctx,'anna-capture'),gain=ctx.createGain();gain.gain.value=0;
+  ctx.createMediaStreamSource(stream).connect(node).connect(gain).connect(ctx.destination);
+  let buf=[],samples=0,voiced=0,silent=0;
+  function reset(){buf=[];samples=voiced=silent=0;}
+  node.port.onmessage=async({data})=>{
+   if(dead||busy||revision!==speechRevision)return;
+   const active=paused||[calmVideo,lessonAudio].find(p=>p&&!p.paused&&!p.ended);
+   if(!active){reset();return;}
+   const rate=ctx.sampleRate,energy=data.reduce((a,x)=>a+x*x,0)/data.length;
+   buf.push(data);samples+=data.length;
+   if(energy>.00012){voiced+=data.length;silent=0;}else{silent+=data.length;if(!paused)voiced=0;}
+   if(!paused){while(buf.length>1&&samples-buf[0].length>=rate*.35)samples-=buf.shift().length;
+    if(voiced<rate*.08)return;
+    paused=active;active.pause();trace('audio','Пауза ответа: голос ученика');}
+   if(silent<rate*.29&&samples<rate*2.6)return;
+   busy=true;
+   try{const response=await fetch('https://api.flamingo.plus/api/anna/listen',{credentials:'include',method:'POST',headers:{'Content-Type':'audio/wav'},body:encodeInput(buf,rate),signal:AbortSignal.any([req.signal,AbortSignal.timeout(4500)])});
+    if(!response.ok)throw Error('listen');const r=await response.json();if(dead)return;
+    const heard=(r.transcript||'').trim();trace('recognition',localTest?'Во время ответа: '+heard:'Обнаружена речь во время ответа',{confidence:r.confidence});
+    const command=heard.toLowerCase().replace(/[^а-яё ]/g,' ').replace(/\s+/g,' ').trim();
+    // The local Russian recognizer also transcribes an isolated «стоп» as «ступ».
+    if((/^(?:стоп|стоп анна|анна стоп|остановись|закончи урок|закончить урок)$/.test(command)&&r.confidence>=.50)||(command==='ступ'&&r.confidence>=.60)){
+     add('Ученик (голос): '+heard);stopLesson('голос');return;}
+   }catch{if(!dead)trace('mic','Прерывание не распознано');}
+   if(!dead&&revision===speechRevision){const media=paused;paused=null;reset();try{await media.play();}catch{}busy=false;}
+  };
+  await ctx.resume();
+ }catch{if(!dead){trace('mic','Прослушивание во время ответа недоступно');close();}}
+}
 let pendingAudio=null, audioUrl=null;
 const mouth=document.querySelector('#talking-lips'), lipOpening=document.querySelector('#lip-opening'),lipOffset=document.querySelector('#lip-offset');
 let mouthFrame=0;
@@ -300,6 +378,7 @@ function syncMouth(wav,revision,text,timeline,probe){
  tick();
 }
 function cancelLessonAudio(){
+ cancelInterruption?.();
  idle.pause();idle.style.display='none';
  calmVideo.onended=calmVideo.onerror=calmVideo.ontimeupdate=null;
  calmVideo.pause();calmVideo.style.display='none';showIdle();
@@ -368,6 +447,17 @@ let boardSpeech=null;
 document.querySelector('#close-board-explanation').onclick=()=>{explanation.hidden=true;};
 function explainOnBoard(text){
  const clean=text.toLowerCase().replace(/ё/g,'е').replace(/можешь (?:мне )?(написать|записать|показать|нарисовать)/g,(_,v)=>({написать:'напиши',записать:'запиши',показать:'покажи',нарисовать:'нарисуй'})[v]);
+ const pointing=clean.trim().match(/^(?:покажи|где|а где|почему)(?: здесь)? (нижнее число|знаменатель|верхнее число|числитель)[?!.]*$/);
+ if(pointing){
+  const ex=tutor.example(),shown=!explanation.hidden&&document.querySelector('#board-explanation-caption').textContent.match(/^(\d+)\/(\d+)/);
+  if(ex.equal===false&&!shown)return explainOnBoard('нарисуй это');
+  const [n,d]=shown?shown.slice(1):[ex.n,ex.d];
+  explainOnBoard('напиши '+n+'/'+d);boardSpeech=null;
+  const lower=/нижнее|знаменатель/.test(pointing[1]);
+  const target=explanation.querySelector(lower?'.fraction-bottom':'.fraction-top');
+  if(target)target.style.backgroundColor='var(--pale)';
+  return lower?'Смотри под черту: '+d+'. Это число всех равных частей.':'Смотри над чертой: '+n+'. Столько частей закрасили.';
+ }
  if(/(?:^|\s)не (?:рисуй|показывай|пиши|надо рисовать)(?=[\s,.!?]|$)/.test(clean))return null;
  const requested=/(?:^|\s)(?:нарисуй|нарисовать|изобрази|изобразить|напиши|запиши|покажи|показать|объясни|что (?:такое|означает|это))(?=[\s,.!?]|$)/i.test(clean);
  if(!requested&&!pendingDrawing)return null;
@@ -391,6 +481,7 @@ function explainOnBoard(text){
  pendingDrawing='';
  if(!Number.isInteger(n)||!Number.isInteger(d)||d<1||d>12||n<0||n>d)return 'Для одного рисунка выбери дробь от нуля до одного, не больше двенадцати равных частей.';
  const caption=document.querySelector('#board-explanation-caption'), drawing=document.querySelector('#board-explanation-drawing');
+ if(stage==='lesson'&&n===ex.n&&d===ex.d)tutor.markHelp();
  if(!explicit&&!circle&&ex.equal===false){
   const strip=tape.cloneNode(true);strip.removeAttribute('id');drawing.replaceChildren(strip);
   caption.textContent='Здесь части разной длины. По их количеству дробь определить нельзя.';
@@ -440,6 +531,9 @@ function explainOnBoard(text){
 function board(){
  if(!task||!tape)return;
  const ex=tutor.example();
+ const key=lessonNumber+':'+ex.number;
+ if(task.dataset.example&&task.dataset.example!==key){explanation.hidden=true;pendingDrawing='';}
+ task.dataset.example=key;
  task.textContent=(ex.number===1?'Первый пример · ':'Самостоятельный пример · ')+ex.title;
  tape.replaceChildren(...Array.from({length:ex.d},(_,i)=>{
   const cell=document.createElement('span');cell.className='cell'+(i<ex.n?' filled':'');if(ex.widths)cell.style.flex=String(ex.widths[i]);return cell;
@@ -454,7 +548,7 @@ calmVideo.className='portrait';calmVideo.style.display='none';calmVideo.playsInl
 calmVideo.src='./calm-reply.mp4';calmPortrait.after(calmVideo);
 const idle=document.createElement('video');idle.className='portrait';idle.style.display='none';
 idle.src='./calm-idle.mp4';idle.muted=true;idle.loop=true;idle.playsInline=true;calmVideo.after(idle);
-function showIdle(){idle.style.display='block';calmPortrait.style.display='none';
+function showIdle(){if(window.matchMedia('(prefers-reduced-motion: reduce)').matches){idle.pause();idle.style.display='none';calmPortrait.style.display='block';return;}idle.style.display='block';calmPortrait.style.display='none';
  if(tutor.snapshot().done){idle.pause();return;}void idle.play().catch(()=>{});}
 showIdle();
 function say(text,preview=false){
@@ -462,10 +556,14 @@ function say(text,preview=false){
  const measuredEnd=preview?null:voiceEndAt;voiceEndAt=null;
  if(!sound.checked&&!preview)return;
  player?.pause();
- const lineText=typeof spokenMath==='function'?spokenMath(text):text;
+ const calmKseniya=['kseniya','kseniya-ref'].includes(demo.value);
+ const phrasing=s=>calmKseniya?s.replace(/!+/g,'.').replace(/Да, молодец\. Дробь верная\./g,'Да, дробь верная.'):s;
+ const lineText=phrasing(typeof spokenMath==='function'?spokenMath(text):text);
  if(lessonAudio){
   const revision=++speechRevision;
   cancelLessonAudio();speaking=true;updateMic();
+  for(const media of [lessonAudio,calmVideo]){media.defaultPlaybackRate=media.playbackRate=calmKseniya?.94:1;media.preservesPitch=true;media.volume=calmKseniya?.88:1;}
+  if(!preview)void watchInterruption(revision);
   const controller=new AbortController();pendingAudio=controller;
   const finish=()=>{if(revision===speechRevision){cancelLessonAudio();speaking=false;updateMic();queueAuto();}};
   if(diagram?.calm){
@@ -598,10 +696,11 @@ function say(text,preview=false){
  synth.speak(line);
 }
 sample?.addEventListener('click',()=>{if(!recognition&&!tutor.snapshot().done)say('Две пятых. Полоску разделили на пять равных частей. Две из них закрасили. Я не расслышала ответ. Повтори, пожалуйста.',true);});
-function add(text){const line=document.createElement('li');line.textContent=text;if(text.startsWith('Ученик'))line.setAttribute?.('data-student','');output.append(line);output.scrollTop=output.scrollHeight;}
+function add(text){if(localTest)trace('dialogue',text);const line=document.createElement('li');line.textContent=text;if(text.startsWith('Ученик'))line.setAttribute?.('data-student','');output.append(line);output.scrollTop=output.scrollHeight;}
 function lockAnswer(locked){reply.disabled=locked;form.querySelector('button').disabled=locked;}
 function paintLessonLine(){
  if(!currentQuestion)return;
+ document.querySelector('#lesson-phase').textContent=tutor.snapshot().done?'Итог урока':stage==='lesson'?(tutor.example().number===1?'Разбираем вместе':'Самостоятельный пример'):stage==='welcome'?'Приветствие':stage==='setup'?'Подключение':'Домашнее задание';
  const active=stage==='lesson'&&!tutor.snapshot().done;
  const short=active&&form.hidden;
  if(workspace)workspace.dataset.active=String(active);
@@ -719,6 +818,13 @@ async function submitReply(text,source='text'){
  if(stage==='review'){
   if(await isWelcomeStop(text)){stage='ended';reviewTools.hidden=true;return tutor.end();}
   if(stage!=='review'||tutor.snapshot().done)return null;
+  const answer=text.toLowerCase().replaceAll('ё','е').trim();
+  const matches=[/^(?:это )?(?:1\s*\/\s*2|одна вторая|половин[ау]|одну вторую)[.!]?$/,
+   /^(?:это )?(?:4\s*\/\s*6|четыре шестых|четыре из шести)[.!]?$/,
+   /^(?:если |когда |только если )?(?:все )?(?:три )?части (?:равны|одинаковы|равные)(?: по размеру)?[.!]?$|^одна из трех равных частей[.!]?$/];
+  if(!matches[lessonNumber-1].test(answer))return ['Сверим с рисунком: целое разделили на две равные части и взяли одну. Как называется такая доля?',
+   'Вспомни рисунок: закрасили четыре части из шести равных. Как это записать?',
+   'Сравни размеры трёх частей. При каком условии одна часть будет третью целого?'][lessonNumber-1];
   return 'Давай сверим. '+reviews[lessonNumber-1][1]+' '+enterExercises();
  }
  if(stage!=='welcome'){
@@ -789,7 +895,9 @@ handsfree?.addEventListener('click',()=>{
  prepareRoomMic();
  updateMic();if(lastSpeech&&!speaking)say(lastSpeech);else queueAuto();
 });
-end.addEventListener('click',()=>{
+end.addEventListener('click',()=>stopLesson('кнопка'));
+function stopLesson(source){
+ if(stage==='ended')return;
  disableAuto();
  stage='ended';
  if(entry)entry.hidden=true;
@@ -797,9 +905,9 @@ end.addEventListener('click',()=>{
  player?.pause();
  const r=recognition;recognition=null;r?.abort();
  speechRevision++;cancelLessonAudio();synth?.cancel();speaking=false;
- display(tutor.end());
- trace('end','Урок остановлен');
-});
+ sound.checked=false;display(tutor.end());
+ trace('end','Урок остановлен: '+source);
+}
 function encodeInput(samples,rate){
  const data=new Float32Array(samples.reduce((n,s)=>n+s.length,0));
  let cursor=0;for(const chunk of samples){data.set(chunk,cursor);cursor+=chunk.length;}
@@ -862,7 +970,7 @@ async function listenLocally(){
     const res=await fetch('https://api.flamingo.plus/api/anna/listen',{credentials:'include',method:'POST',headers:{'Content-Type':'audio/wav'},body:wav,signal:request.signal});
     if(!res.ok)throw new Error('recognition');
     const result=await res.json();if(recognition!==ticket)return;
-    trace('recognition',result.transcript?'Ответ распознан':'Нет распознанной речи',{confidence:result.confidence});
+    trace('recognition',result.transcript?(localTest?'Распознано: '+result.transcript:'Ответ распознан'):'Нет распознанной речи',{confidence:result.confidence});
     recognition=null;status.textContent='';
     await showVoiceTurn({...result,local:true},ticket.auto&&heard?lastLoudAt:null);updateMic();queueAuto();
    }catch{if(recognition===ticket){recognition=null;disableAuto();status.textContent='Не удалось распознать голос локально. Попробуй ещё раз или напиши ответ.';updateMic();}}

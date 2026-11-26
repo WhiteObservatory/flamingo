@@ -17,6 +17,9 @@ export function createTutor(task){
  return {end,dismissOffer(){if(state==='offered')state='active';},async send(raw){
   if(state==='ended')return labels.ended;
   const s=norm(raw);
+  if(/^(?:закончить|закончи|заверши) урок(?: пожалуйста)?$/.test(s))return end();
+  if(state==='offered'&&/^(?:нет )?(?:я )?попробую сам[а]?$/.test(s)){state='active';return labels.declined;}
+  if(state==='offered'&&/^(?:да )?помоги(?: пожалуйста)?$/.test(s))return this.send('да');
   if(/^(стоп|на этом остановимся|все заканчиваем|мне пора закончим позже|я больше не хочу заниматься|хватит на сегодня|давай(?:те)? закончим(?: урок)?|(?:я устал[а]? )?(?:я )?(?:больше )?не хочу продолжать(?: урок)?|на сегодня все|можно закончить|закончим на сегодня)$/.test(s))return end();
   if(/^(?:(?:пожалуйста )?(?:просто )?(?:скажи(?:те)?|дай(?:те)?|назови(?:те)?) (?:мне )?(?:готовый )?(?:ответ|результат)(?: пожалуйста)?|(?:а )?какой (?:тут )?(?:правильный )?ответ|какой будет ответ|можешь сказать что получилось)$/.test(s)){state='offered';return labels.offer;}
   if(state==='offered'&&/^(нет|не надо|не сейчас спасибо|не хочу разбирать)$/.test(s)){state='active';return labels.declined;}
