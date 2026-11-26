@@ -714,7 +714,7 @@ function paintLessonLine(){
  const trailingQuestion=lastSpeech.match(/(?:^|[.!?]\s+)([^.!?]+\?)\s*$/)?.[1]?.trim();
  currentQuestion.textContent=short?(trailingQuestion||tutor.resumeQuestion?.()||'') : lastSpeech;
 }
-function display(text){if(text===null)return;const state=tutor.snapshot();const task=state.done&&state.notes.length>=2&&stage==='lesson'?homework[lessonNumber-1]:null;if(task&&homeworkPanel.hidden){homeworkPanel.textContent='Домашнее задание. '+task;homeworkPanel.hidden=false;text+=' '+homeworkPanel.textContent;}lastSpeech=text;add('Учитель: '+text);paintLessonLine();board();if(state.done){closeCamera();disableAuto();lockAnswer(true);end.disabled=true;showView('board');if(restart)restart.hidden=false;if(nextLesson){nextLesson.hidden=lessonNumber>=3||!state.notes[1]?.independent;nextLesson.textContent=lessonNumber===1?'Дальше: равные и неравные части':'Дальше: эквивалентные дроби';}}updateMic();say(text);}
+function display(text){if(text===null)return;const state=tutor.snapshot();const task=state.done&&state.notes.length>=2&&stage==='lesson'?homework[lessonNumber-1]:null;if(task&&homeworkPanel.hidden){homeworkPanel.textContent='Домашнее задание. '+task;homeworkPanel.hidden=false;text+=' '+homeworkPanel.textContent;}lastSpeech=text;add('Учитель: '+text);paintLessonLine();board();if(state.done){closeCamera();disableAuto();lockAnswer(true);end.disabled=true;showView('board');if(restart)restart.hidden=false;if(nextLesson){nextLesson.hidden=lessonNumber>=3||state.notes.length<2||!state.notes.at(-1)?.independent;nextLesson.textContent=lessonNumber===1?'Дальше: равные и неравные части':'Дальше: эквивалентные дроби';}}updateMic();say(text);}
 if(entry){lockAnswer(true);updateMic();}else display(tutor.opening);
 function reviewOpening(prefix=''){
  const review=reviews[lessonNumber-1];
@@ -877,7 +877,7 @@ document.querySelector('#show-review')?.addEventListener('click',e=>{
 document.querySelector('#continue-lesson')?.addEventListener('click',()=>{if(stage==='review')display(enterExercises());});
 restart?.addEventListener('click',()=>window.location.reload());
 nextLesson?.addEventListener('click',()=>{
- if(lessonNumber>=3||!tutor.snapshot().notes[1]?.independent)return;
+ if(lessonNumber>=3||tutor.snapshot().notes.length<2||!tutor.snapshot().notes.at(-1)?.independent)return;
  lessonNumber++;tutor=lessonNumber===2?secondLesson():thirdLesson();output.replaceChildren();
  explanation.hidden=true;pendingDrawing='';
  homeworkPanel.hidden=true;homeworkPanel.textContent='';

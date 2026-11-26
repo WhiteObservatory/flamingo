@@ -1,6 +1,22 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {firstLesson,secondLesson,thirdLesson,voiceTurn} from '../frontend/public/sedum/anna/tutor-lesson.mjs';
+for(const [make,first,second,third] of [
+ [firstLesson,'две закрашены, всего пять','три закрашены, всего шесть','одна закрашена, всего четыре'],
+ [secondLesson,'нельзя, части разной длины','один из трех равных отрезков закрашен','один из четырех равных отрезков закрашен'],
+ [thirdLesson,...[4,6,8].map(d=>'разделить оба числа на два, из 2/'+d+' получится 1/'+d/2)]
+]){
+ test(make.name+' — после помощи новый пример, без ложного зачёта',async()=>{
+  for(const helpAgain of [false,true]){
+   const t=make();await t.send(first);const old=t.example();t.markHelp();await t.send(second);
+   assert.equal(t.snapshot().done,false);assert.equal(t.snapshot().notes[1].independent,false);
+   assert.equal(t.example().number,3);assert.notEqual(t.example().d,old.d);
+   if(helpAgain)t.markHelp();await t.send(third);assert.equal(t.snapshot().done,true);
+   assert.equal(t.snapshot().notes.at(-1).independent,!helpAgain);
+  }
+  const t=make();await t.send(first);await t.send(second);assert.equal(t.snapshot().done,true);assert.equal(t.snapshot().notes.length,2);
+ });
+}
 test('ASR: исправление доли, но не догадка по знаку минус',async()=>{
  const heard=s=>({local:true,transcript:s,isFinal:true,confidence:.82});
  for(const s of ['3-5. Ой, нет, 2-5.','3/5. Ой, нет, 2/5.','Три-пятых. Ой, нет. Две-пятых.']){

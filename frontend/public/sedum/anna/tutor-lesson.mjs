@@ -64,7 +64,8 @@ export async function voiceTurn(tutor,result){
 }
 const items=[
  {title:'Полоску разделили на пять равных частей. Две закрасили.',n:2,d:5},
- {title:'Ленту разделили на шесть равных частей. Три закрасили.',n:3,d:6}
+ {title:'Ленту разделили на шесть равных частей. Три закрасили.',n:3,d:6},
+ {title:'На новой полоске четыре равные части, одна закрашена.',n:1,d:4}
 ];
 const why='Что означают верхнее и нижнее числа в этой записи?';
 const symbols={одна:1,две:2,три:3,четыре:4,пять:5,шесть:6,один:1,два:2,двух:2,трех:3,четырех:4,пяти:5,шести:6};
@@ -78,6 +79,7 @@ function fraction(s){
  if(w)return [symbols[w[1]],{пятая:5,пятых:5,шестая:6,шестых:6,вторая:2,вторых:2}[w[2]]];
  if(/^(?:половина|одна вторая|полоски половина)[.!]?$/i.test(s.trim()))return [1,2];
  if(/^одна треть[.!]?$/i.test(s.trim()))return [1,3];
+ if(/^(?:одна четвертая|одна четверть|четверть)[.!]?$/i.test(s.trim()))return [1,4];
  const part=s.match(/^(\d+|одна|две|три|четыре|пять|шесть|один|два) из (\d+|двух|трех|четырех|пяти|шести)[.!]?$/);
  if(part)return [symbols[part[1]]??Number(part[1]),{двух:2,трех:3,четырех:4,пяти:5,шести:6}[part[2]]??Number(part[2])];
 }
@@ -151,14 +153,14 @@ export function firstLesson(){
  const end=()=>{done=true;return guard.end();};
  function advance(correct,understanding){
   notes.push({correct,understanding,independent:correct&&understanding&&!assisted});
-  if(index===1){
+  if(index>0&&(notes.at(-1).independent||index===items.length-1)){
    done=true;
-   return notes[1].independent
+   return notes.at(-1).independent
     ? 'Ты самостоятельно решил новый пример и объяснил оба числа.'
     : 'На новом примере самостоятельное понимание пока не подтверждено.';
   }
   index++;phase='answer';hint=false;assisted=false;unclear=0;
-  guard=createTutor({equal:true,total:6,marked:3});
+  guard=createTutor({equal:true,total:items[index].d,marked:items[index].n});
   return 'Теперь новый пример — попробуй самостоятельно. '+items[index].title+' Какая доля закрашена?';
  }
  return {opening:items[0].title+' Какая доля закрашена?',snapshot,end,
@@ -228,7 +230,8 @@ export function firstLesson(){
 
 const equalTrack=[
  {title:'Полоска: три части разной длины. Одна закрашена.',widths:[1,2,3],n:1,d:3,equal:false},
- {title:'Лента: один из трёх равных отрезков закрашен.',widths:[1,1,1],n:1,d:3,equal:true}
+ {title:'Лента: один из трёх равных отрезков закрашен.',widths:[1,1,1],n:1,d:3,equal:true},
+ {title:'Новая лента: один из четырёх равных отрезков закрашен.',widths:[1,1,1,1],n:1,d:4,equal:true}
 ];
 const negative=/^(?:нет|нельзя|не обязательно|не треть|по одному числу частей нельзя)(?:[\s,.!]|$)/i;
 const unequalParts=/(?:части|куски|кусочки|отрезки)\s+(?:(?:все|здесь|уже)\s+)?(?:неравные|не равны|не одинаковы|неодинаковые|разной длины|разного размера)|(?:длина|длины|размер|размеры)\s+(?:частей|кусков|кусочков|отрезков)\s+(?:разн\w*|не равны|не одинаковы)/i;
@@ -239,17 +242,17 @@ export function secondLesson(){
  const question=()=>index===0?'Можно ли назвать закрашенное одной третью просто потому, что это одна часть из трёх?':'Какая доля ленты закрашена?';
  function finish(correct,understanding){
   notes.push({correct,understanding,independent:correct&&understanding&&!help});
-  if(index===1){
+  if(index>0&&(notes.at(-1).independent||index===equalTrack.length-1)){
    done=true;
-   return notes[1].independent?'Ты самостоятельно объяснил, когда долю можно определить по числу частей.':'Самостоятельное объяснение на новом примере пока не подтверждено.';
+   return notes.at(-1).independent?'Ты самостоятельно объяснил, когда долю можно определить по числу частей.':'Самостоятельное объяснение на новом примере пока не подтверждено.';
   }
   index++;phase='answer';help=false;
-  guard=createTutor({equal:true,total:3,marked:1});
-  return 'Теперь попробуй самостоятельно. '+equalTrack[1].title+' '+question();
+  guard=createTutor({equal:true,total:equalTrack[index].d,marked:1});
+  return 'Теперь попробуй самостоятельно. '+equalTrack[index].title+' '+question();
  }
  function explain(){
   return index===0?'По одному количеству частей долю не определить: части разной длины. Для доли нужно сравнить длину закрашенного отрезка с длиной всей полоски.':
-   'Ленту разделили на три равных отрезка. Закрашен один из них — это одна треть.';
+   equalTrack[index].title+(index===1?' Это одна треть.':' Это одна четверть.');
  }
  return {
   opening:equalTrack[0].title+' '+question(),
@@ -266,10 +269,10 @@ export function secondLesson(){
    if(signal!==labels.wait||forgotten(raw)){help=true;phase='reason';return explain()+' '+this.resumeQuestion();}
    const text=normalize(raw), no=negative.test(text), unequal=unequalParts.test(text);
    const answer=fraction(raw)??combined(raw)?.answer;
-   const correctFraction=answer&&answer[0]>0&&answer[1]===3*answer[0];
+   const d=equalTrack[index].d,correctFraction=answer&&answer[0]>0&&answer[1]===d*answer[0];
    const reasoning=combined(raw)?.reason??raw;
-   const equalReason=!unequal&&/равн|одинаков/.test(reasoning)&&(evidence(reasoning,1,3)||
-    /^один из (?:трех|3) равных (?:отрезков|частей) закрашен[.!]?$/i.test(normalize(reasoning)));
+   const equalReason=!unequal&&/равн|одинаков/.test(reasoning)&&(evidence(reasoning,1,d)||
+    new RegExp('^один из '+(d===4?'(?:четырех|4)':'(?:трех|3)')+' равных (?:отрезков|частей) закрашен[.!]?$').test(normalize(reasoning)));
    if(no||answer||uncertainty(raw)||equalReason)guard.dismissOffer();
    const claimsThird=/^(?:да|можно|это треть|это одна треть)(?:[\s,.!]|$)/i.test(text)||!!answer;
    if(index===0&&!claimsThird&&(no||phase==='reason'||/нельзя|недостаточно/.test(text))&&unequal)
@@ -277,14 +280,14 @@ export function secondLesson(){
    if(index===0&&no&&phase==='answer'){
     phase='reason';return 'Ответ «нет» верный. Почему здесь нельзя просто посчитать части?';
    }
-   if(index===1&&(!answer||correctFraction)&&equalReason)
-    return 'Верно: одна из трёх равных частей — одна треть. '+finish(true,true);
-   if(index===1&&correctFraction){
-    phase='reason';return 'Одна треть — верно. Почему здесь можно определить долю по числу частей?';
+   if(index>0&&(!answer||correctFraction)&&equalReason)
+    return 'Верно: '+explain()+' '+finish(true,true);
+   if(index>0&&correctFraction){
+    phase='reason';return 'Доля верная. Почему здесь можно определить её по числу частей?';
    }
    if(!help){
     help=true;
-    if(index===1&&answer&&!correctFraction&&equalReason)
+    if(index>0&&answer&&!correctFraction&&equalReason)
      return 'Ты верно посчитал части, но записанная дробь им не соответствует. Как записать одну закрашенную часть из всех равных отрезков?';
     return index===0?'Сравни длины трёх частей. Можно ли считать их одинаковыми долями?':
      'Посмотри на рисунок: одинаковой ли длины отрезки? Объясни, как это помогает найти долю.';
@@ -296,7 +299,8 @@ export function secondLesson(){
 
 const equivalentTrack=[
  {title:'Полоска: две из четырёх равных частей закрашены.',n:2,d:4,base:'1/2',wholeGroups:2},
- {title:'Лента: две из шести равных частей закрашены.',n:2,d:6,base:'1/3',wholeGroups:3}
+ {title:'Лента: две из шести равных частей закрашены.',n:2,d:6,base:'1/3',wholeGroups:3},
+ {title:'На новой полоске две из восьми равных частей закрашены.',n:2,d:8,base:'1/4',wholeGroups:4}
 ];
 export function thirdLesson(){
  let index=0,phase='decision',help=false,done=false;
@@ -309,11 +313,11 @@ export function thirdLesson(){
   return `Объединим маленькие части по две. Из ${d} равных частей получим ${wholeGroups} равные группы, одна из них закрашена. Поэтому 2/${d} и ${base} показывают одинаковую долю.`;};
  function advance(correct,understanding){
   notes.push({correct,understanding,independent:correct&&understanding&&!help});
-  if(index===1){
+  if(index>0&&(notes.at(-1).independent||index===equivalentTrack.length-1)){
    done=true;
-   return notes[1].independent?'Ты самостоятельно объяснил, почему разные дроби могут обозначать одну и ту же долю.':'На новом примере самостоятельное объяснение пока не подтверждено.';
+   return notes.at(-1).independent?'Ты самостоятельно объяснил, почему разные дроби могут обозначать одну и ту же долю.':'На новом примере самостоятельное объяснение пока не подтверждено.';
   }
-  index=1;phase='decision';help=false;guard=createTutor({equal:true,total:6,marked:2});
+  index++;phase='decision';help=false;guard=createTutor({equal:true,total:equivalentTrack[index].d,marked:2});
   return 'Теперь попробуй самостоятельно. '+opening();
  }
  return {
@@ -331,12 +335,12 @@ export function thirdLesson(){
    const text=normalize(raw).replace(/[.!?]+$/,'');
    const same=/^(?:да|одинаковую|одинаковые|одна и та же доля|равны|это одно и то же)(?:$|[,;])/.test(text);
    const different=/^(?:нет|разную|разные|не равны)(?:$|[,;])/.test(text);
-   const group=index===0?'(?:две|2)':'(?:три|3)';
+   const group=['(?:две|2)','(?:три|3)','(?:четыре|4)'][index];
    const reason=new RegExp('^(?:если )?(?:сгруппировать|объединить|группируем|объединяем|соединим|собрать) (?:части |их )?по (?:две|два|2)(?: (?:кусочка|части))?[,;]?(?: получим| получится)? '+group+' равные группы[,;] (?:закрашена одна|одна закрашена)(?: группа)?$');
    const reasoning=text.replace(/^(?:да|одинаковую|равны)[,;]\s*/,'');
    const {d,base}=equivalentTrack[index];
    const dividesBoth=new RegExp('^(?:если )?разделить (?:верхнее и нижнее числа|оба числа|числитель и знаменатель) на (?:два|2), из 2/'+d+' получится '+base+'$');
-   const paired=new RegExp('^(?:мы )?объединили '+(index===0?'(?:четыре|4)':'(?:шесть|6)')+' равных (?:кусочка|части|частей|кусочков) попарно[:,] получились '+group+' одинаковые группы,? и закрашена (?:ровно )?одна$');
+   const paired=new RegExp('^(?:мы )?объединили '+['(?:четыре|4)','(?:шесть|6)','(?:восемь|8)'][index]+' равных (?:кусочка|части|частей|кусочков) попарно[:,] получились '+group+' одинаковые группы,? и закрашена (?:ровно )?одна$');
    const understood=!different&&(reason.test(reasoning)||paired.test(reasoning)||dividesBoth.test(reasoning));
    if(same||different||understood||uncertainty(raw))guard.dismissOffer();
    if(understood)return 'Верно: изменилось деление на части, а закрашенная доля не изменилась. '+advance(true,true);
